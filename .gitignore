@@ -1,4 +1,5 @@
 *.test
 coverage.out
 .vscode
-.env.bash
+env.bash
+moneyball/moneyball
