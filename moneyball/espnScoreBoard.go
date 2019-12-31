@@ -64,16 +64,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Specific Team: http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/:team
 //
 import (
-	"bytes"
 	"context"
-	"compress/gzip"
 	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"io/ioutil"
-	"net/http"
-	"net/url"
 	"os"
 	"strings"
 	"time"
@@ -113,16 +106,17 @@ type SeasonDef struct {
 // League ... definition of league JSON from ESPN.com
 type League struct {
 	ID                  string     `json:"id" binding:"required"`
-	UID                 string     `json:"uid"`
-	Name                string     `json:"name"`
-	Abbreviation        string     `json:"abbreviation"`
+	UID                 string     `json:"uid" binding:"required"`
+	Name                string     `json:"name,omitempty"`
+	Abbreviation        string     `json:"abbreviation,omitempty"`
 	Slug                string     `json:"slug,omitempty"`
-	Season              SeasonDef  `json:"season"`
-	CalendarType        string     `json:"calendarType"`
-	CalendarIsWhiteList bool       `json:"calendarIsWhitelist"`
-	CalendarStartDate   espnTime   `json:"calendarStartDate"`
-	CalendarEndDate     espnTime   `json:"calendarEndDate"`
-	Calendar            []espnTime `json:"calendar"`
+	Season              SeasonDef  `json:"season,omitempty"`
+	CalendarType        string     `json:"calendarType,omitempty"`
+	CalendarIsWhiteList bool       `json:"calendarIsWhitelist,omitempty"`
+	CalendarStartDate   espnTime   `json:"calendarStartDate,omitempty"`
+	CalendarEndDate     espnTime   `json:"calendarEndDate,omitempty"`
+	Calendar            []espnTime `json:"calendar,omitempty"`
+	Teams               []Team     `json:"teams,omitempty"`
 }
 
 //SeasonShort ...
@@ -179,11 +173,11 @@ type Address struct {
 
 //Venue ...
 type Venue struct {
-	ID           string    `json:"id" binding:"required"`
-	FullName     string    `json:"fullName,omitempty"`
-	Address      Address   `json:"address,omitempty"`
-	Capacity     int       `json:"capacity"`
-	IsIndoor     bool      `json:"indoor"`
+	ID       string  `json:"id" binding:"required"`
+	FullName string  `json:"fullName,omitempty"`
+	Address  Address `json:"address,omitempty"`
+	Capacity int     `json:"capacity"`
+	IsIndoor bool    `json:"indoor"`
 }
 
 //Competition ...
@@ -224,13 +218,13 @@ type GeoBroadcast struct {
 
 //GBType ...
 type GBType struct {
-	ID        string `json:"id"`        // "1"
+	ID        string `json:"id"`                  // "1"
 	ShortName string `json:"shortName,omitempty"` // "TV"
 }
 
 //GBMarket ...
 type GBMarket struct {
-	ID   string `json:"id"`   // "2"
+	ID   string `json:"id"`             // "2"
 	Type string `json:"type,omitempty"` // "Home"
 }
 
@@ -303,40 +297,63 @@ type Record struct {
 
 //Team ...
 type Team struct {
-	ID               string      `json:"id" binding:"required"`
-	UID              string      `json:"uid,omitempty"`
-	Location         string      `json:"location,omitempty"`         //"Toronto",
-	Name             string      `json:"name,omitempty"`             // "Raptors"
-	Abbreviation     string      `json:"abbreviation,omitempty"`     // "TOR"
-	DisplayName      string      `json:"displayName,omitempty"`      // "Toronto Raptors"
-	ShortDisplayName string      `json:"shortDisplayName,omitempty"` // Raptors
-	Color            string      `json:"color,omitempty"`            //"CEOF41"
-	AlternateColor   string      `json:"alternateColor,omitempty"`   //"061922"
-	IsActive         bool        `json:"isActive"`
-	Venue            Venue       `json:"venue"`
-	Links            []Link      `json:"links"`
-	Logo             string      `json:"logo,omitempty"`
-	Score            string      `json:"score,omitempty"`
-	Linescores       []Linescore `json:"linescores"`
+	ID               string        `json:"id" binding:"required"`
+	UID              string        `json:"uid" binding:"required"`
+	Slug             string        `json:"slug,omitempty"`
+	Location         string        `json:"location,omitempty"`         //"Toronto",
+	Name             string        `json:"name,omitempty"`             // "Raptors"
+	Abbreviation     string        `json:"abbreviation,omitempty"`     // "TOR"
+	DisplayName      string        `json:"displayName,omitempty"`      // "Toronto Raptors"
+	ShortDisplayName string        `json:"shortDisplayName,omitempty"` // Raptors
+	Color            string        `json:"color,omitempty"`            //"CEOF41"
+	AlternateColor   string        `json:"alternateColor,omitempty"`   //"061922"
+	IsActive         bool          `json:"isActive"`
+	IsAllStar        bool          `json:"isAllStar"`
+	Venue            Venue         `json:"venue"`
+	Links            []Link        `json:"links,omitempty"`
+	Logos            []Link        `json:"logos,omitempty"`
+	Logo             string        `json:"logo,omitempty"`
+	Score            string        `json:"score,omitempty"`
+	Linescores       []Linescore   `json:"linescores,omitempty"`
+	Record           []RecordItems `json:"record,omitempty"`
+}
+
+// RecordItems ...
+type RecordItems struct {
+	Items []Item `json:"items,omitempty"`
+}
+
+// TeamStatistic ...
+type TeamStatistic struct {
+	Name  string  `json:"name"`  //"name":"playoffSeed",
+	Value float32 `json:"value"` //"value":15.0},
+}
+
+// Item ...
+type Item struct {
+	Summary string          `json:"summary"` //"summary":"7-27",
+	Stats   []TeamStatistic `json:"stats"`   //"stats":[
 }
 
 //Link ...
 type Link struct {
-	Language   string   `json:"language,omitonempty"`
+	Language   string   `json:"language,omitempty"`
 	Rel        []string `json:"rel"`            // ["clubhouse","desktop","team"],
 	HRef       string   `json:"href"`           //"http://www.espn.com/nba/team/_/name/tor/toronto-raptors",
 	Text       string   `json:"text,omitempty"` // "Clubhouse"
 	Logo       string   `json:"logo,omitempty"` //"https://a.espncdn.com/i/teamlogos/nba/500/scoreboard/tor.png"
 	IsExternal bool     `json:"isExternal"`
 	IsPremium  bool     `json:"isPremium"`
+	Width      int      `json:"width"`
+	Height     int      `json:"height"`
 }
 
 //StatLeader ..
 type StatLeader struct {
-	Name             string      `json:"name"`             // e.g. "pointsPerGame"
-	DisplayName      string      `json:"displayName,omitonempty"`      // e.g. "Points Per Game"
-	ShortDisplayName string      `json:"shortDisplayName,omitonempty"` // e.g. "PPG"
-	Abbreviation     string      `json:"abbreviation,omitonempty"`     // e.g. "PPG"
+	Name             string      `json:"name"`                       // e.g. "pointsPerGame"
+	DisplayName      string      `json:"displayName,omitempty"`      // e.g. "Points Per Game"
+	ShortDisplayName string      `json:"shortDisplayName,omitempty"` // e.g. "PPG"
+	Abbreviation     string      `json:"abbreviation,omitempty"`     // e.g. "PPG"
 	Leaders          []AthLeader `json:"leaders"`
 }
 
@@ -357,36 +374,15 @@ type Position struct {
 //Athlete ...]
 type Athlete struct {
 	ID          string   `json:"id" binding:"required"` // e.g. "id":"3012",
-	FullName    string   `json:"fullName,omitonempty"`              // e.g. "fullName":"Kyle Lowry",
-	DisplayName string   `json:"displayName,omitonempty"`           // e.g. "displayName":"Kyle Lowry",
-	ShortName   string   `json:"shortName,omitonempty"`             // e.g."K. Lowry",
+	FullName    string   `json:"fullName,omitempty"`    // e.g. "fullName":"Kyle Lowry",
+	DisplayName string   `json:"displayName,omitempty"` // e.g. "displayName":"Kyle Lowry",
+	ShortName   string   `json:"shortName,omitempty"`   // e.g."K. Lowry",
 	Links       []Link   `json:"links"`
-	Jersey      string   `json:"jersey,omitonempty"`   // e.g. "jersey":"7",
-	Headshot    string   `json:"headshot"` // e.g. "headshot":"https://a.espncdn.com/i/headshots/nba/players/full/3012.png",
+	Jersey      string   `json:"jersey,omitempty"` // e.g. "jersey":"7",
+	Headshot    string   `json:"headshot"`         // e.g. "headshot":"https://a.espncdn.com/i/headshots/nba/players/full/3012.png",
 	Position    Position `json:"position"`
 	Team        Team     `json:"team" binding:"required"`
 	Active      bool     `json:"active"`
-}
-
-func getRequest(url string) (*http.Request, error) {
-	// Create a new request using http
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return req, err
-	}
-	//req.Header.Add("Accept-Encoding", "gzip")
-
-	// get useragent
-	agent, exists := os.LookupEnv("ESPN_USERAGENT")
-	if !exists {
-		fmt.Println("ESPN_USERAGENT not found, should include your website or email credential")
-		agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15"
-	}
-	// per instructions set user-information to prevent robot blocking
-	req.Header.Set("User-Agent", agent)
-
-	//req.Header.Set("Host", "domain.tld")
-	return req, err
 }
 
 //espnTime is a custom Time parser
@@ -419,13 +415,13 @@ func (espnt *espnTime) UnmarshalJSON(bs []byte) error {
 func (s *StatsService) ScoreBoardService(ctx context.Context) (*ScoreBoard, *Response, error) {
 
 	req, err := s.client.NewRequest("GET", urlPrefix+"/nba/scoreboard", nil)
-	
+
 	//to support gzip encoding uncomment... should probably default to true
 	//req.Header.Add("Accept-Encoding", "gzip")
 
 	// get useragent from OS Environment Variables -> often needed to prevent robot blocking or API access with lower DoS thresholds
-	agent, exists:= os.LookupEnv("ESPN_USERAGENT")
-	if (exists) { 
+	agent, exists := os.LookupEnv("ESPN_USERAGENT")
+	if exists {
 		req.Header.Set("User-Agent", agent)
 	}
 
@@ -438,134 +434,39 @@ func (s *StatsService) ScoreBoardService(ctx context.Context) (*ScoreBoard, *Res
 	return sb, resp, err
 }
 
-func (c *Client) newRequest(method, path string, body interface{}) (*http.Request, error) {
-	rel := &url.URL{Path: path}
-	u := c.BaseURL.ResolveReference(rel)
-	var buf io.ReadWriter
-	if body != nil {
-		buf = new(bytes.Buffer)
-		err := json.NewEncoder(buf).Encode(body)
-		if err != nil {
-			return nil, err
-		}
+//Sport ...
+type Sport struct {
+	ID      string   `json:"id" binding:"required"`  //"id":"40",
+	UID     string   `json:"uid" binding:"required"` //	"uid":"s:40",
+	Name    string   `json:"name,omitempty"`         //	"name":"Basketball",
+	Slug    string   `json:"slug,omitempty"`         //	"slug":"basketball",
+	Leagues []League `json:"leagues,omitempty"`      // "leagues":[
+}
+
+//TeamSport ... array of teams for json depacking
+type TeamSport struct {
+	Sport []Sport `json:"sports"`
+}
+
+//TeamsService will, for a http client, return a ScoreBoard JSON object
+//
+func (s *StatsService) TeamsService(ctx context.Context) (*TeamSport, *Response, error) {
+
+	req, err := s.client.NewRequest("GET", urlPrefix+"/nba/teams", nil)
+
+	//to support gzip encoding uncomment... should probably default to true
+	//req.Header.Add("Accept-Encoding", "gzip")
+
+	// get useragent from OS Environment Variables -> often needed to prevent robot blocking or API access with lower DoS thresholds
+	agent, exists := os.LookupEnv("ESPN_USERAGENT")
+	if exists {
+		req.Header.Set("User-Agent", agent)
 	}
-	req, err := http.NewRequest(method, u.String(), buf)
+	teams := &TeamSport{}
+	resp, err := s.client.Do(ctx, req, teams)
 	if err != nil {
-		return nil, err
+		fmt.Printf("Error on new request: %s\n", err)
+		return nil, resp, err
 	}
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-	req.Header.Set("Accept", "application/json")
-	req.Header.Set("User-Agent", c.UserAgent)
-	return req, nil
+	return teams, resp, err
 }
-
-func (c *Client) do(req *http.Request, v interface{}) (*http.Response, error) {
-	resp, err := c.client.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-	err = json.NewDecoder(resp.Body).Decode(v)
-	return resp, err
-}
-
-func doGet(baseurl string, query string) (*json.Decoder, error) {
-	req, err := getRequest(baseurl + query)
-	if err != nil {
-		fmt.Printf("The HTTP request header building failed with error %s\n", err)
-		return nil, err
-	}
-
-	// Send req using http Client
-	client := &http.Client{}
-	fmt.Println("doing HTTP GET")
-	resp, err := client.Do(req)
-
-	// received an error on the HTTP request
-	if err != nil {
-		fmt.Printf("The HTTP request header building failed with error %s\n", err)
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		data, _ := ioutil.ReadAll(resp.Body)
-		fmt.Printf("The HTTP request header building failed with error %s : %s\n", resp.Status, data)
-		return nil, errors.New(string(data))
-	} else if resp.Header.Get("Content-Encoding") == "gzip" {
-		fmt.Println("parsing HTTP GZIP-response")
-		//resp.Header.Del("Content-Length")
-		gz, err := gzip.NewReader(resp.Body)
-		defer gz.Close()
-		decoder := json.NewDecoder(gz)
-		if err != nil {
-			fmt.Printf("Error in gzip response decoding %s\n", err)
-			return nil, err
-		}
-		//resp.Body = gzreadCloser{zr, resp.Body}
-		return decoder, nil
-	}
-	// for initial debugging of data structures uncomment
-	//data, _ := ioutil.ReadAll(resp.Body)
-	//var sb ScoreBoard
-	//err = json.Unmarshal(data, &sb)
-	//if err != nil {
-	//	fmt.Printf("Error in json error unmarshalling %s\n\n", err)
-	//}
-	//fmt.Printf("The HTTP request header coded %s : %s\n\n", resp.Status, data)
-	//fmt.Printf(fmt.Sprintf("Scoreboard: %#v\n", sb))
-	decoder := json.NewDecoder(resp.Body)
-	return decoder, nil
-}
-
-func decodeScoreboard(decoder *json.Decoder) (*ScoreBoard, error) {
-
-	var sb ScoreBoard
-
-	// Decode the response into our Events struct
-	err := decoder.Decode(&sb)
-	if err != nil {
-		fmt.Printf("error caught: %s", err)
-		return nil, err
-	}
-	//setup provenance
-	//ev.Extracted = extractTime
-	//ev.ExtractedSrc = extractSrc
-	//TODO: dig deep into nested structure to set time/src
-	return &sb, nil
-}
-
-type gzreadCloser struct {
-	*gzip.Reader
-	io.Closer
-}
-
-func (gz gzreadCloser) Close() error {
-	return gz.Closer.Close()
-}
-
-/*func main() {
-	fmt.Println("Loading environment configuration constants")
-
-	//construct the event header
-	baseurl, exists := os.LookupEnv("ESPN_STATS_URL")
-	if !exists {
-		fmt.Println("ESPN_STATS_URL not found, should include your website or email credential")
-		baseurl = "https://site.api.espn.com/apis/site/v2/sports/"
-	}
-	// test fetching BoxScores
-	decoder, err := doGet(baseurl, "/basketball/nba/scoreboard")
-	if (err) != nil {
-		fmt.Printf("error caught: %s", err)
-		return
-	}
-	client := NewClient(nil)
-	
-
-	scoreboard, _ := decodeScoreboard(decoder)
-	fmt.Printf(fmt.Sprintf("Scoreboard: %#v\n", scoreboard))
-
-	fmt.Println("Terminating the application normally...")
-}*/

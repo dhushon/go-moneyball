@@ -272,4 +272,10 @@ func main() {
 	}
 	fmt.Printf("ScoreBoardService: %d scores for date %s retrieved\n", len(scoreboard.Events), scoreboard.Day.Date)
 	fmt.Printf("Response: %#v\n", scoreboard)
+	teams, _, err := client.Stats.TeamsService(ctx)
+	if err != nil {
+		fmt.Printf("TeamsService: Error %s\n", err) 
+	}
+	fmt.Printf("TeamsService: %d teams for date retrieved\n", len(teams.Sport[0].Leagues[0].Teams))
+
 }
