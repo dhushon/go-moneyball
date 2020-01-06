@@ -72,13 +72,25 @@ type Client struct {
 	common service // Reuse a single struct instead of allocating one for each service on the heap.
 
 	// Services used for talking to different parts of the Monumental API.
-	Stats *StatsService
+	Stats    *StatsService
+	Schedule *ScheduleService
+	Score    *ScoreService
+	Player   *PlayerService
 	//Authorizations *AuthorizationsService
 }
 
 type service struct {
 	client *Client
 }
+
+//ScheduleService ... Schedule Retrieval Service
+type ScheduleService service
+
+//ScoreService ... Retrieve a BoxScore
+type ScoreService service
+
+//PlayerService ... Player content
+type PlayerService service
 
 //NewClient returns a new ESPN API client. If a nil httpClient is
 // provided, a new http.Client will be used. To use API methods which require
@@ -95,6 +107,9 @@ func NewClient(httpClient *http.Client) *Client {
 	c.common.client = c
 
 	c.Stats = (*StatsService)(&c.common)
+	c.Schedule = (*ScheduleService)(&c.common)
+	c.Score = (*ScoreService)(&c.common)
+	c.Player = (*PlayerService)(&c.common)
 
 	return c
 }
@@ -190,7 +205,7 @@ func withContext(ctx context.Context, req *http.Request) *http.Request {
 //
 // The provided ctx must be non-nil, if it is nil an error is returned. If it is canceled or times out,
 // ctx.Err() will be returned.
-func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Response, error) {
+func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}, weakTyped bool) (*Response, error) {
 	if ctx == nil {
 		return nil, errors.New("context must be non-nil")
 	}
@@ -232,10 +247,11 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}) (*Res
 		if w, ok := v.(io.Writer); ok {
 			io.Copy(w, resp.Body)
 		} else {
-			//decode logic to pull JSON for structural assessment
+			//uncomment below to test decode logic to pull JSON for structural assessment
 			//buf := new(bytes.Buffer)
 			//buf.ReadFrom(resp.Body)
-			//fmt.Printf("JSON:\n %s\n",buf.String())
+			//fmt.Printf("JSON:\n %s\n\n", buf.String())
+			//decErr := json.NewDecoder(buf).Decode(v)
 			decErr := json.NewDecoder(resp.Body).Decode(v)
 			if decErr == io.EOF {
 				decErr = nil // ignore EOF errors caused by empty response body
@@ -265,6 +281,59 @@ func main() {
 	// if using oath2 comment rest
 	client := NewClient(nil)
 	ctx := context.Background()
+
+	schedParams := map[string]string{
+		"year": "2019", //2019 season (current)
+	}
+	schedule, _, err := client.Schedule.NBAScheduleServicev2(ctx, schedParams)
+	if err != nil {
+		fmt.Printf("ScheduleService: Error %s\n", err)
+	}
+	fmt.Printf("NBAScheduleService: %d with values %#v retrieved\n", len(*schedule), (*schedule)[0])
+	//getTodayGames(schedule)
+	todayStart := time.Now()
+	tomorrow := todayStart.AddDate(0,0,1)
+	counter := 0
+	// look for games today... get box scores...
+	for i, game := range *schedule {
+		if (game.StartTime.After(todayStart) && game.StartTime.Before(tomorrow)) {
+			//have a game I care about
+			counter = counter +1
+			fmt.Printf("today game id: %s, start: %s %s, url: %s\n",game.GameID, game.StartTimeEastern, game.StartDateEastern, game.GameURLCode)
+			// go get details.
+			params := map[string]string{
+				"gamedate":game.StartDateEastern,
+				"gameid":game.GameID}
+			temp, _, err := client.Score.NBABoxScoreServicev2(ctx, params)
+			if err != nil {
+				fmt.Printf("BoxScoreService: Error %s\n", err)
+			} else {
+				// replace existing game with the detailed box.
+				fmt.Printf("orig_game %s", game.GameURLCode)
+				(*schedule)[i] = *temp
+				fmt.Printf("new game %#v",(*schedule)[i])
+				// could build independent array of games or add detail or... 
+			
+			}
+			fmt.Printf("next\n")
+		}
+	}
+	//todo: getYesterdayBoxes(schedule)
+
+	// test script for old BoxScore Service using old NBA API's - this is kinda a mess
+	boxscore, _, err := client.Score.BoxScoreService(ctx)
+	if err != nil {
+		fmt.Printf("BoxScoreService: Error %s\n", err)
+	}
+	fmt.Printf("NBABoxScoreService: %s with values %#v retrieved\n", "test", boxscore) //boxscore.Event.Game.GameID, boxscore)
+
+	// tests for PlayerMovement service from nba... this is used to show player roster changes (but seems to be non-authoritative)
+	statstln, _, err := client.Stats.PlayerMovementStatsService(ctx)
+	if err != nil {
+		fmt.Printf("ScoreBoardService: Error: %s\n", err)
+	}
+	fmt.Printf("NBAPlayerMovementStatsService: %s StatName with values of %#v retrieved\n", statstln.StatGroupName, statstln.StatGroup)
+
 	//get the current scoreboard
 	scoreboard, _, err := client.Stats.ScoreBoardService(ctx)
 	if err != nil {
@@ -274,7 +343,7 @@ func main() {
 	fmt.Printf("Response: %#v\n", scoreboard)
 	teams, _, err := client.Stats.TeamsService(ctx)
 	if err != nil {
-		fmt.Printf("TeamsService: Error %s\n", err) 
+		fmt.Printf("TeamsService: Error %s\n", err)
 	}
 	fmt.Printf("TeamsService: %d teams for date retrieved\n", len(teams.Sport[0].Leagues[0].Teams))
 

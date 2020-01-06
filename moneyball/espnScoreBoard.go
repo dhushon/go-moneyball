@@ -1,7 +1,6 @@
 package main
 
 /**
-Copyright (c) 2013 The go-github AUTHORS. All rights reserved.
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved
 
 Redistribution and use in source and binary forms, with or without
@@ -67,13 +66,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/url"
 	"os"
 	"strings"
 	"time"
 )
 
 const (
-	urlPrefix = "apis/site/v2/sports/basketball/"
+	espnBaseURL   = "https://site.api.espn.com/"
+	espnURLPrefix = "apis/site/v2/sports/basketball/"
 )
 
 // StatsService handles communication with the Statistics related methods of the ESPN API.
@@ -414,7 +415,8 @@ func (espnt *espnTime) UnmarshalJSON(bs []byte) error {
 //
 func (s *StatsService) ScoreBoardService(ctx context.Context) (*ScoreBoard, *Response, error) {
 
-	req, err := s.client.NewRequest("GET", urlPrefix+"/nba/scoreboard", nil)
+	s.client.BaseURL, _ = url.Parse(espnBaseURL)
+	req, err := s.client.NewRequest("GET", espnURLPrefix+"nba/scoreboard", nil)
 
 	//to support gzip encoding uncomment... should probably default to true
 	//req.Header.Add("Accept-Encoding", "gzip")
@@ -426,7 +428,7 @@ func (s *StatsService) ScoreBoardService(ctx context.Context) (*ScoreBoard, *Res
 	}
 
 	sb := &ScoreBoard{}
-	resp, err := s.client.Do(ctx, req, sb)
+	resp, err := s.client.Do(ctx, req, sb, false)
 	if err != nil {
 		fmt.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
@@ -452,7 +454,8 @@ type TeamSport struct {
 //
 func (s *StatsService) TeamsService(ctx context.Context) (*TeamSport, *Response, error) {
 
-	req, err := s.client.NewRequest("GET", urlPrefix+"/nba/teams", nil)
+	s.client.BaseURL, _ = url.Parse(espnBaseURL)
+	req, err := s.client.NewRequest("GET", espnURLPrefix+"nba/teams", nil)
 
 	//to support gzip encoding uncomment... should probably default to true
 	//req.Header.Add("Accept-Encoding", "gzip")
@@ -463,7 +466,7 @@ func (s *StatsService) TeamsService(ctx context.Context) (*TeamSport, *Response,
 		req.Header.Set("User-Agent", agent)
 	}
 	teams := &TeamSport{}
-	resp, err := s.client.Do(ctx, req, teams)
+	resp, err := s.client.Do(ctx, req, teams, false)
 	if err != nil {
 		fmt.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
