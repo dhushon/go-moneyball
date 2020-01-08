@@ -1,5 +1,6 @@
 *.test
 coverage.out
 .vscode
+*/.DS_Store
 env.bash
 moneyball/moneyball
