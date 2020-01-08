@@ -32,8 +32,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"context"
-	"fmt"
 	"testing"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestESPNScoreBoardService(t *testing.T) {
@@ -41,17 +41,17 @@ func TestESPNScoreBoardService(t *testing.T) {
 	ctx := context.Background()
 	//get the current scoreboard
 	scoreboard, _, err := client.Stats.ScoreBoardService(ctx)
-	AssertTrue(t, t.Name()+" espnScoreboard positive effect", (err == nil))
-	fmt.Printf("ScoreBoardService: %d scores for date %s retrieved\n", len(scoreboard.Events), scoreboard.Day.Date)
-	AssertTrue(t, t.Name()+" espnScoreboard positive length response", (len(scoreboard.Events)) > 0)
-	fmt.Printf("Response: %#v\n", scoreboard)
+	assert.Nil(t, err, err)
+	//fmt.Printf("ScoreBoardService: %d scores for date %s retrieved\n", len(scoreboard.Events), scoreboard.Day.Date)
+	assert.NotZero(t, len(scoreboard.Events), t.Name()+" espnScoreboard positive length response")
+	//fmt.Printf("Response: %#v\n", scoreboard)
 }
 
 func TestESPNTeamService(t *testing.T) {
 	client := NewClient(nil)
 	ctx := context.Background()
 	teams, _, err := client.Stats.TeamsService(ctx)
-	AssertTrue(t, t.Name()+" espnTeams positive effect", (err == nil))
-	AssertTrue(t, t.Name()+" espnTeams positive length response", len(teams.Sport[0].Leagues[0].Teams) > 0)
-	fmt.Printf("TeamsService: %d teams for date retrieved %#v\n", len(teams.Sport[0].Leagues[0].Teams), teams.Sport[0].Leagues[0].Teams)
+	assert.Nil(t, err, err)
+	assert.NotZero(t, len(teams.Sport[0].Leagues[0].Teams) > 0, "espnTeams should be a positive length response")
+	//fmt.Printf("TeamsService: %d teams for date retrieved %#v\n", len(teams.Sport[0].Leagues[0].Teams), teams.Sport[0].Leagues[0].Teams)
 }
