@@ -155,7 +155,6 @@ func nbaPathModifier(orig string, modifier map[string]string) (string, error) {
 		//note that source string de-mark is '{' '}' eted.
 		search := "{" + (strings.ToLower(param)) + "}"
 		orig = strings.Replace(orig, search, modifier[param], 1)
-		fmt.Printf("old2new: %s\n", orig)
 	}
 	if strings.Contains(orig, "{") {
 		return orig, fmt.Errorf("new Path: %s continues to include variables not satisfied", orig)
