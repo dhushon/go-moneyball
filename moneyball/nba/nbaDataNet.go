@@ -1,4 +1,4 @@
-package main
+package nba
 
 /**
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved
@@ -41,20 +41,19 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //REF: http://nbasense.com/nba-api/Data/Cms/Game/Boxscore
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
-	"net/url"
 	"strconv"
-	"strings"
-	//"os"
 )
 
 const (
-	dataNBABaseURL   = "https://data.nba.net/"
-	dataNBAURLPrefix = "json/cms/"
-	playerBio        = "bios/player_201935.json"
-	boxscore         = "noseason/game/"
+	//DataNBABaseURL ...
+	DataNBABaseURL = "https://data.nba.net/"
+	//DataNBAURLPathPrefix ...
+	DataNBAURLPathPrefix = "json/cms/"
+	//PlayerBioPath ...
+	PlayerBioPath = "bios/player_201935.json"
+	//BoxScorePath ...
+	BoxScorePath = "noseason/game/"
 )
 
 //SeasonMeta ... //TODO.. nba is inconsistent in structure of SeasonMeta... sometimes strings, someimtes ints...
@@ -97,16 +96,16 @@ type SportsEvent struct {
 
 //SportsContent ...
 type SportsContent struct {
-	Meta     SportsMeta `json:"sports_meta"`
-	Game     SportsGame      `json:"game"`
-	Schedule SportsSchedule  `json:"schedule"`
+	Meta     SportsMeta     `json:"sports_meta"`
+	Game     SportsGame     `json:"game"`
+	Schedule SportsSchedule `json:"schedule"`
 }
 
 // SportsMeta ...
 type SportsMeta struct {
-	DateTime   string          `json:"date_time"`   //TODO fix time date for strong temporal alignment "20170510 1438"
+	DateTime   string     `json:"date_time"`   //TODO fix time date for strong temporal alignment "20170510 1438"
 	SeasonMeta SeasonMeta `json:"season_meta"` //TODO rebuild parser as SeasonMeta is inconsistent from NBA
-	Next       CMSTarget       `json:"next"`
+	Next       CMSTarget  `json:"next"`
 }
 
 //CMSTarget ...
@@ -165,10 +164,10 @@ type Player struct {
 
 //Person ...
 type Person struct {
-	FirstName string `json:"first_name"`
-	FName     string `json:"FirstName,omitempty"` //used in game->team->leaders
-	LastName  string `json:"last_name"`
-	LName     string `json:"LastName"`                //used in game->team->leaders
+	FirstName string  `json:"first_name"`
+	FName     string  `json:"FirstName,omitempty"` //used in game->team->leaders
+	LastName  string  `json:"last_name"`
+	LName     string  `json:"LastName"`                //used in game->team->leaders
 	JerseyStr FlexInt `json:"jersey_number,omitempty"` //TODO unmarshall to int
 	//PlayerCode 			   string `json:"player_code,omitempty"` //"PlayerCode":"kyle_lowry" //used in game->team->leaders TODO redefinition of player_code?
 	PersonID               string  `json:"person_id"` //TODO unmarshal to ID[int]
@@ -296,7 +295,7 @@ func (fi *FlexInt) UnmarshalJSON(b []byte) error {
 	if err := json.Unmarshal(b, &s); err != nil {
 		return err
 	}
-	if (s == "") {
+	if s == "" {
 		*fi = FlexInt(-1)
 	} else {
 		i, err := strconv.Atoi(s)
@@ -306,97 +305,4 @@ func (fi *FlexInt) UnmarshalJSON(b []byte) error {
 		*fi = FlexInt(i)
 	}
 	return nil
-}
-
-func scheduleServiceURLModifier(modifier map[string]string) (string, error) {
-	//http://data.nba.net/json/cms/2016/league/nba_games.json
-	suffix := ""
-	for param := range modifier {
-		switch param {
-		case "period", "Period", "PERIOD":
-			//legal values are years, dates [yyyymmdd], today or week
-			p := modifier[param]
-			if len(p) > 4 {
-				// go ahead and parse extended date
-				suffix = "2018/" //TODO parse extended date
-				break
-			} else if p == "ALL" {
-				break
-			} else {
-				if strings.HasPrefix(p, "20") || strings.HasPrefix(p, "19") {
-					// test to see if can convert to int... if yes
-					if _, err := strconv.Atoi(p); err == nil {
-						suffix = suffix + p + "/"
-						break
-					}
-					//return "", err
-					break
-				}
-				break
-			}
-		case "team", "Team", "TEAM":
-			//see if we have an ID
-			//see if we have an abbreviation
-			//if all just zero out
-			//else ignore or trigger an error?
-			break
-		default:
-			//parameter unknown trigger an error?
-		}
-	}
-	return suffix, nil
-}
-
-/*NBAScheduleService ...
-  NBA schedule for [year,Today,Week] for Team [Team-UID]
-  - this is done upstream for the different league services? ?league = ["NBA","WNBA"] absent defaults to NBA
-  ?period = [$yyyy, $yyyymmdd, "Today","Week"] absent defaults to Today
-  ?team = [$teamID or $teamAbbr.] absent returns all teams
-*/
-func (s *ScheduleService) NBAScheduleService(ctx context.Context, modifier map[string]string) (*[]ScheduledGame, *Response, error) {
-	s.client.BaseURL, _ = url.Parse(dataNBABaseURL)
-	//http://data.nba.net/json/cms/2016/league/nba_games.json
-	suffix, err := scheduleServiceURLModifier(modifier)
-	//+"league/nba_games.json"
-	if !(strings.HasSuffix(suffix, "/")) {
-		suffix = suffix + "/"
-	}
-	req, err := s.client.NewRequest("GET", "json/cms/"+suffix+"league/nba_games.json", nil)
-	if err != nil {
-		return nil, nil, err
-	}
-	event := &SportsEvent{}
-	resp, err := s.client.Do(ctx, req, event, true)
-	if err != nil {
-		fmt.Printf("Error caught: %s\n", err)
-	}
-	return nil, resp, err
-	//return &event.Event.Schedule.Games, resp, err
-}
-
-//BoxScoreService will, for a http client, return a StatsTLN JSON object ( note that this is not yet normalized to structures)
-func (s *ScoreService) BoxScoreService(ctx context.Context) (*SportsEvent, *Response, error) {
-
-	s.client.BaseURL, _ = url.Parse(dataNBABaseURL)
-	req, err := s.client.NewRequest("GET", "json/cms/noseason/game/20170201/0021600732/boxscore.json", nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	//to support gzip encoding uncomment... should probably default to true
-	//req.Header.Add("Accept-Encoding", "gzip")
-
-	// get useragent from OS Environment Variables -> often needed to prevent robot blocking or API access with lower DoS thresholds
-	//agent, exists := os.LookupEnv("NBA_USERAGENT")
-	//if exists {
-	//	req.Header.Set("User-Agent", agent)
-	//}
-	event := &SportsEvent{}
-	resp, err := s.client.Do(ctx, req, event, true)
-	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
-		return nil, resp, err
-	}
-	//TODO... extract meta and bring backscore of game
-	return event, resp, err
 }

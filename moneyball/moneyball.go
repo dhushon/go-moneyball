@@ -35,15 +35,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // which led to https://github.com/google/go-github which is really quite like our fetch/version process
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
-	"errors"
 	"fmt"
-	"io"
-	"net/http"
-	"net/url"
-	"strings"
+	"moneyball/go-moneyball/moneyball/infoservice"
 	"time"
 	//"golang.org/x/oauth2"
 )
@@ -56,214 +50,6 @@ const (
 	headerRateRemaining = "X-RateLimit-Remaining"
 	headerRateReset     = "X-RateLimit-Reset"
 )
-
-// A Client manages communication with the GitHub API.
-type Client struct {
-	client *http.Client // HTTP client used to communicate with the API.
-
-	// Base URL for API requests. Defaults to the public ESPN API, but can be
-	// set to a domain endpoint to use with GitHub Enterprise. BaseURL should
-	// always be specified with a trailing slash.
-	BaseURL *url.URL
-
-	// User agent used when communicating with the Monumental and Partner API's.
-	UserAgent string
-
-	common service // Reuse a single struct instead of allocating one for each service on the heap.
-
-	// Services used for talking to different parts of the Monumental API.
-	Stats    *StatsService
-	Schedule *ScheduleService
-	Score    *ScoreService
-	Player   *PlayerService
-	//Authorizations *AuthorizationsService
-}
-
-type service struct {
-	client *Client
-}
-
-//ScheduleService ... Schedule Retrieval Service
-type ScheduleService service
-
-//ScoreService ... Retrieve a BoxScore
-type ScoreService service
-
-//PlayerService ... Player content
-type PlayerService service
-
-//NewClient returns a new ESPN API client. If a nil httpClient is
-// provided, a new http.Client will be used. To use API methods which require
-// authentication, provide an http.Client that will perform the authentication
-// for you (such as that provided by the golang.org/x/oauth2 library).
-func NewClient(httpClient *http.Client) *Client {
-	if httpClient == nil {
-		httpClient = &http.Client{}
-	}
-	baseURL, _ := url.Parse(defaultBaseURL)
-
-	c := &Client{client: httpClient, BaseURL: baseURL, UserAgent: userAgent}
-
-	c.common.client = c
-
-	c.Stats = (*StatsService)(&c.common)
-	c.Schedule = (*ScheduleService)(&c.common)
-	c.Score = (*ScoreService)(&c.common)
-	c.Player = (*PlayerService)(&c.common)
-
-	return c
-}
-
-// NewRequest creates an API request. A relative URL can be provided in urlStr,
-// in which case it is resolved relative to the BaseURL of the Client.
-// Relative URLs should always be specified without a preceding slash. If
-// specified, the value pointed to by body is JSON encoded and included as the
-// request body.
-func (c *Client) NewRequest(method, urlStr string, body interface{}) (*http.Request, error) {
-
-	// ensure the url
-	if !strings.HasSuffix(c.BaseURL.Path, "/") {
-		return nil, fmt.Errorf("BaseURL must have a trailing slash, but %q does not", c.BaseURL)
-	}
-	u, err := c.BaseURL.Parse(urlStr)
-	if err != nil {
-		return nil, err
-	}
-
-	// if we need to send a body with the request
-	var buf io.ReadWriter
-	if body != nil {
-		buf = new(bytes.Buffer)
-		enc := json.NewEncoder(buf)
-		enc.SetEscapeHTML(false)
-		err := enc.Encode(body)
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	// create the new request e.g. GET, URL (stringified), body
-	req, err := http.NewRequest(method, u.String(), buf)
-	if err != nil {
-		return nil, err
-	}
-	// post adjust request string
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
-	}
-	if c.UserAgent != "" {
-		req.Header.Set("User-Agent", c.UserAgent)
-	}
-	return req, nil
-}
-
-// Response is a ESPN API response. This wraps the standard http.Response
-// returned from ESPN and provides convenient access to things like
-// origination details.
-type Response struct {
-	*http.Response
-
-	pTime time.Time
-	pCall string
-}
-
-// newResponse creates a new Response for the provided http.Response.
-// r must not be nil.
-func newResponse(r *http.Response) *Response {
-	response := &Response{Response: r}
-	response.pTime = time.Now()
-	return response
-}
-
-// sanitizeURL redacts the client_secret parameter from the URL which may be
-// exposed to the user.
-func sanitizeURL(uri *url.URL) *url.URL {
-	if uri == nil {
-		return nil
-	}
-	params := uri.Query()
-	if len(params.Get("client_secret")) > 0 {
-		params.Set("client_secret", "REDACTED")
-		uri.RawQuery = params.Encode()
-	}
-	return uri
-}
-
-func withContext(ctx context.Context, req *http.Request) *http.Request {
-	return req.WithContext(ctx)
-	//on App Engine comment above, decomment below as App Engine treats context differently
-	// No-op because App Engine adds context to a request differently.
-	//return req
-}
-
-// Do sends an API request and returns the API response. The API response is
-// JSON decoded and stored in the value pointed to by v, or returned as an
-// error if an API error has occurred. If v implements the io.Writer
-// interface, the raw response body will be written to v, without attempting to
-// first decode it. If rate limit is exceeded and reset time is in the future,
-// Do returns *RateLimitError immediately without making a network API call.
-//
-// The provided ctx must be non-nil, if it is nil an error is returned. If it is canceled or times out,
-// ctx.Err() will be returned.
-func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}, weakTyped bool) (*Response, error) {
-	if ctx == nil {
-		return nil, errors.New("context must be non-nil")
-	}
-	req = withContext(ctx, req)
-
-	// could do rateLimiting here to make sure that we don't push too hard.
-
-	resp, err := c.client.Do(req)
-	if err != nil {
-		// If we got an error, and the context has been canceled,
-		// the context's error is probably more useful.
-		select {
-		case <-ctx.Done():
-			return nil, ctx.Err()
-		default:
-		}
-
-		// If the error type is *url.Error, sanitize its URL before returning.
-		if e, ok := err.(*url.Error); ok {
-			if url, err := url.Parse(e.URL); err == nil {
-				e.URL = sanitizeURL(url).String()
-				return nil, e
-			}
-		}
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	// check for non 200/202 strings
-	if (resp.StatusCode > 202) || resp.StatusCode < 200 {
-		//we have an error being returned..Address
-		err = errors.New("HTTP Status Code: " + resp.Status)
-		fmt.Printf("Received %s, Message: %s", err, resp.Body)
-		return nil, err
-	}
-	response := newResponse(resp)
-
-	if v != nil {
-		if w, ok := v.(io.Writer); ok {
-			io.Copy(w, resp.Body)
-		} else {
-			//uncomment below to test decode logic to pull JSON for structural assessment
-			//buf := new(bytes.Buffer)
-			//buf.ReadFrom(resp.Body)
-			//fmt.Printf("JSON:\n %s\n\n", buf.String())
-			//decErr := json.NewDecoder(buf).Decode(v)
-			decErr := json.NewDecoder(resp.Body).Decode(v)
-			if decErr == io.EOF {
-				decErr = nil // ignore EOF errors caused by empty response body
-			}
-			if decErr != nil {
-				err = decErr
-			}
-		}
-	}
-
-	return response, err
-}
 
 /**
  * ability to test OAUTH2 access for sso
@@ -279,7 +65,7 @@ func main() {
 	client := NewClient(tc)
 	*/
 	// if using oath2 comment rest
-	client := NewClient(nil)
+	client := infoservice.NewClient(nil)
 	ctx := context.Background()
 
 	schedParams := map[string]string{
@@ -292,18 +78,18 @@ func main() {
 	fmt.Printf("NBAScheduleService: %d with values %#v retrieved\n", len(*schedule), (*schedule)[0])
 	//getTodayGames(schedule)
 	todayStart := time.Now()
-	tomorrow := todayStart.AddDate(0,0,1)
+	tomorrow := todayStart.AddDate(0, 0, 1)
 	counter := 0
 	// look for games today... get box scores...
 	for i, game := range *schedule {
-		if (game.StartTime.After(todayStart) && game.StartTime.Before(tomorrow)) {
+		if game.StartTime.After(todayStart) && game.StartTime.Before(tomorrow) {
 			//have a game I care about
-			counter = counter +1
-			fmt.Printf("today game id: %s, start: %s %s, url: %s\n",game.GameID, game.StartTimeEastern, game.StartDateEastern, game.GameURLCode)
+			counter = counter + 1
+			fmt.Printf("today game id: %s, start: %s %s, url: %s\n", game.GameID, game.StartTimeEastern, game.StartDateEastern, game.GameURLCode)
 			// go get details.
 			params := map[string]string{
-				"gamedate":game.StartDateEastern,
-				"gameid":game.GameID}
+				"gamedate": game.StartDateEastern,
+				"gameid":   game.GameID}
 			temp, _, err := client.Score.NBABoxScoreServicev2(ctx, params)
 			if err != nil {
 				fmt.Printf("BoxScoreService: Error %s\n", err)
@@ -311,9 +97,9 @@ func main() {
 				// replace existing game with the detailed box.
 				fmt.Printf("orig_game %s", game.GameURLCode)
 				(*schedule)[i] = *temp
-				fmt.Printf("new game %#v",(*schedule)[i])
-				// could build independent array of games or add detail or... 
-			
+				fmt.Printf("new game %#v", (*schedule)[i])
+				// could build independent array of games or add detail or...
+
 			}
 			fmt.Printf("next\n")
 		}
@@ -328,20 +114,20 @@ func main() {
 	fmt.Printf("NBABoxScoreService: %s with values %#v retrieved\n", "test", boxscore) //boxscore.Event.Game.GameID, boxscore)
 
 	// tests for PlayerMovement service from nba... this is used to show player roster changes (but seems to be non-authoritative)
-	statstln, _, err := client.Stats.PlayerMovementStatsService(ctx)
+	statstln, _, err := client.Stats.NBAPlayerMovementStatsService(ctx)
 	if err != nil {
 		fmt.Printf("ScoreBoardService: Error: %s\n", err)
 	}
 	fmt.Printf("NBAPlayerMovementStatsService: %s StatName with values of %#v retrieved\n", statstln.StatGroupName, statstln.StatGroup)
 
 	//get the current scoreboard
-	scoreboard, _, err := client.Stats.ScoreBoardService(ctx)
+	scoreboard, _, err := client.Score.ESPNBoxScoreService(ctx)
 	if err != nil {
 		fmt.Printf("ScoreBoardService: Error: %s\n", err)
 	}
 	fmt.Printf("ScoreBoardService: %d scores for date %s retrieved\n", len(scoreboard.Events), scoreboard.Day.Date)
 	fmt.Printf("Response: %#v\n", scoreboard)
-	teams, _, err := client.Stats.TeamsService(ctx)
+	teams, _, err := client.Stats.ESPNTeamsService(ctx)
 	if err != nil {
 		fmt.Printf("TeamsService: Error %s\n", err)
 	}

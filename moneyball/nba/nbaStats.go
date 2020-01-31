@@ -1,4 +1,4 @@
-package main
+package nba
 
 /**
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved
@@ -37,17 +37,16 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // PlayerMovement: https://stats.nba.com/js/data/playermovement/NBA_Player_Movement.json
 
 import (
-	"context"
 	"encoding/json"
-	"fmt"
-	"net/url"
-	"os"
 )
 
 const (
-	nbaBaseURL     = "https://stats.nba.com/"
-	nbaURLPrefix   = "js/data/"
-	playerMovement = "playermovement/NBA_Player_Movement.json"
+	//NBAStatsBaseURL ...
+	NBAStatsBaseURL = "https://stats.nba.com/"
+	//NBAStatsURLPrefix ...
+	NBAStatsURLPrefix = "js/data/"
+	//PlayerMovementPath ...
+	PlayerMovementPath = "playermovement/NBA_Player_Movement.json"
 )
 
 /*{
@@ -116,29 +115,6 @@ func (tln *StatsTLN) UnmarshalJSON(bs []byte) (err error) {
 
 //PlayerMovement ...
 type PlayerMovement struct {
-}
-
-//PlayerMovementStatsService will, for a http client, return a StatsTLN JSON object ( note that this is not yet normalized to structures)
-func (s *StatsService) PlayerMovementStatsService(ctx context.Context) (*StatsTLN, *Response, error) {
-
-	s.client.BaseURL, _ = url.Parse(nbaBaseURL)
-	req, err := s.client.NewRequest("GET", nbaURLPrefix+playerMovement, nil)
-
-	//to support gzip encoding uncomment... should probably default to true
-	//req.Header.Add("Accept-Encoding", "gzip")
-
-	// get useragent from OS Environment Variables -> often needed to prevent robot blocking or API access with lower DoS thresholds
-	agent, exists := os.LookupEnv("NBA_USERAGENT")
-	if exists {
-		req.Header.Set("User-Agent", agent)
-	}
-	tln := &StatsTLN{}
-	resp, err := s.client.Do(ctx, req, tln, true)
-	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
-		return nil, resp, err
-	}
-	return tln, resp, err
 }
 
 /*func main() {

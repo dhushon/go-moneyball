@@ -1,4 +1,4 @@
-package main
+package infoservice
 
 /**
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved
@@ -32,12 +32,13 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"context"
+	"moneyball/go-moneyball/moneyball/infoservice"
 	"testing"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestESPNScoreBoardService(t *testing.T) {
-	client := NewClient(nil)
+	client := infoservice.NewClient(nil)
 	ctx := context.Background()
 	//get the current scoreboard
 	scoreboard, _, err := client.Stats.ScoreBoardService(ctx)
@@ -48,7 +49,7 @@ func TestESPNScoreBoardService(t *testing.T) {
 }
 
 func TestESPNTeamService(t *testing.T) {
-	client := NewClient(nil)
+	client := infoservice.NewClient(nil)
 	ctx := context.Background()
 	teams, _, err := client.Stats.TeamsService(ctx)
 	assert.Nil(t, err, err)

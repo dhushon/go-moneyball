@@ -1,4 +1,4 @@
-package main
+package nba
 
 /**
 Copyright (c) 2013 The go-github AUTHORS. All rights reserved.
@@ -39,16 +39,14 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //REF: http://nbasense.com/nba-api/Data/Cms/Game/Boxscore
 
 import (
-	"context"
-	"fmt"
-	"net/url"
-	"strings"
 	"time"
 )
 
 const (
-	dataNBABaseURLv2       = "https://data.nba.net/"
-	dataNBAProdURLPrefixv2 = "prod/v2/"
+	//DataNBABaseURLv2 ...
+	DataNBABaseURLv2 = "https://data.nba.net/"
+	//DataNBAProdURLPrefixv2 ...
+	DataNBAProdURLPrefixv2 = "prod/v2/"
 )
 
 //CMSProdv2Schedule ... based upon this structure http://data.nba.net/prod/v2/2019/schedule.json
@@ -148,73 +146,4 @@ type Arena struct {
 //Scorev2 - used for linescores
 type Scorev2 struct {
 	Score FlexInt `json:"score"`
-}
-
-func nbaPathModifier(orig string, modifier map[string]string) (string, error) {
-	for param := range modifier { //go thru find/replace on map
-		//note that source string de-mark is '{' '}' eted.
-		search := "{" + (strings.ToLower(param)) + "}"
-		orig = strings.Replace(orig, search, modifier[param], 1)
-	}
-	if strings.Contains(orig, "{") {
-		return orig, fmt.Errorf("new Path: %s continues to include variables not satisfied", orig)
-	}
-	return orig, nil
-}
-
-//NBABoxScoreServicev2 will, for a http client, provide a ScheduledGame ( note that this is not yet normalized to structures)
-//		boxscorev1 http://data.nba.net/prod/v1/{gameDate}/{gameId}_boxscore.json e.g. http://data.nba.net/prod/v1/20170201/0021600732_boxscore.json
-func (s *ScoreService) NBABoxScoreServicev2(ctx context.Context, modifier map[string]string) (*ScheduledGamev2, *Response, error) {
-
-	s.client.BaseURL, _ = url.Parse(dataNBABaseURLv2)
-	path := "prod/v1/{gamedate}/{gameid}_boxscore.json"
-	suffix, err := nbaPathModifier(path, modifier)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	req, err := s.client.NewRequest("GET", suffix, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	//to support gzip encoding uncomment... should probably default to true
-	//req.Header.Add("Accept-Encoding", "gzip")
-
-	// get useragent from OS Environment Variables -> often needed to prevent robot blocking or API access with lower DoS thresholds
-	//agent, exists := os.LookupEnv("NBA_USERAGENT")
-	//if exists {
-	//	req.Header.Set("User-Agent", agent)
-	//}
-	event := &CMSProdv1BoxScore{}
-	resp, err := s.client.Do(ctx, req, event, true)
-	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
-		return nil, resp, err
-	}
-	return &event.Game, resp, err
-}
-
-//NBAScheduleServicev2 is an updated nba feed for NBA Schefule information
-//http://data.nba.net/prod/v2/{year}/schedule.json e.g. http://data.nba.net/prod/v2/2019/schedule.json
-func (s *ScheduleService) NBAScheduleServicev2(ctx context.Context, modifier map[string]string) (*[]ScheduledGamev2, *Response, error) {
-
-	s.client.BaseURL, _ = url.Parse(dataNBABaseURLv2)
-	path := "prod/v2/{year}/schedule.json"
-	suffix, err := nbaPathModifier(path, modifier)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	req, err := s.client.NewRequest("GET", suffix, nil)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	event := &CMSProdv2Schedule{}
-	resp, err := s.client.Do(ctx, req, event, true)
-	if err != nil {
-		fmt.Printf("Error caught: %s\n", err)
-	}
-	return &event.LeagueSchedule.Standard, resp, err
 }

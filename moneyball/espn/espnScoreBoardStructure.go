@@ -1,4 +1,4 @@
-package main
+package espn
 
 /**
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved
@@ -63,22 +63,17 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Specific Team: http://site.api.espn.com/apis/site/v2/sports/basketball/mens-college-basketball/teams/:team
 //
 import (
-	"context"
 	"encoding/json"
-	"fmt"
-	"net/url"
-	"os"
 	"strings"
 	"time"
 )
 
 const (
-	espnBaseURL   = "https://site.api.espn.com/"
-	espnURLPrefix = "apis/site/v2/sports/basketball/"
+	//EspnBaseURL is the URL basis for calls to ESPN API's
+	EspnBaseURL   = "https://site.api.espn.com/"
+	//EspnURLPrefix is the URL filepath prefix for calls to v2 of ESPN API's
+	EspnURLPrefix = "apis/site/v2/sports/basketball/"
 )
-
-// StatsService handles communication with the Statistics related methods of the ESPN API.
-type StatsService service
 
 //ScoreBoard ...
 type ScoreBoard struct {
@@ -411,31 +406,6 @@ func (espnt *espnTime) UnmarshalJSON(bs []byte) error {
 	return nil
 }
 
-//ScoreBoardService will, for a http client, return a ScoreBoard JSON object
-//
-func (s *StatsService) ScoreBoardService(ctx context.Context) (*ScoreBoard, *Response, error) {
-
-	s.client.BaseURL, _ = url.Parse(espnBaseURL)
-	req, err := s.client.NewRequest("GET", espnURLPrefix+"nba/scoreboard", nil)
-
-	//to support gzip encoding uncomment... should probably default to true
-	//req.Header.Add("Accept-Encoding", "gzip")
-
-	// get useragent from OS Environment Variables -> often needed to prevent robot blocking or API access with lower DoS thresholds
-	agent, exists := os.LookupEnv("ESPN_USERAGENT")
-	if exists {
-		req.Header.Set("User-Agent", agent)
-	}
-
-	sb := &ScoreBoard{}
-	resp, err := s.client.Do(ctx, req, sb, false)
-	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
-		return nil, resp, err
-	}
-	return sb, resp, err
-}
-
 //Sport ...
 type Sport struct {
 	ID      string   `json:"id" binding:"required"`  //"id":"40",
@@ -448,28 +418,4 @@ type Sport struct {
 //TeamSport ... array of teams for json depacking
 type TeamSport struct {
 	Sport []Sport `json:"sports"`
-}
-
-//TeamsService will, for a http client, return a ScoreBoard JSON object
-//
-func (s *StatsService) TeamsService(ctx context.Context) (*TeamSport, *Response, error) {
-
-	s.client.BaseURL, _ = url.Parse(espnBaseURL)
-	req, err := s.client.NewRequest("GET", espnURLPrefix+"nba/teams", nil)
-
-	//to support gzip encoding uncomment... should probably default to true
-	//req.Header.Add("Accept-Encoding", "gzip")
-
-	// get useragent from OS Environment Variables -> often needed to prevent robot blocking or API access with lower DoS thresholds
-	agent, exists := os.LookupEnv("ESPN_USERAGENT")
-	if exists {
-		req.Header.Set("User-Agent", agent)
-	}
-	teams := &TeamSport{}
-	resp, err := s.client.Do(ctx, req, teams, false)
-	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
-		return nil, resp, err
-	}
-	return teams, resp, err
 }
