@@ -1,0 +1,149 @@
+{
+  "creationTime": "1579631815258", 
+  "etag": "yRfJgoaIWNZCImfkmP+OuQ==", 
+  "id": "burnished-case-265021:boxscores.boxscoresNBA", 
+  "kind": "bigquery#table", 
+  "lastModifiedTime": "1579634785928", 
+  "location": "US", 
+  "numBytes": "447", 
+  "numLongTermBytes": "0", 
+  "numRows": "2", 
+  "schema": {
+    "fields": [
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE", 
+            "name": "away", 
+            "type": "INTEGER"
+          }, 
+          {
+            "mode": "NULLABLE", 
+            "name": "home", 
+            "type": "INTEGER"
+          }
+        ], 
+        "mode": "NULLABLE", 
+        "name": "gamescore", 
+        "type": "RECORD"
+      }, 
+      {
+        "mode": "NULLABLE", 
+        "name": "location", 
+        "type": "STRING"
+      }, 
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE", 
+            "name": "abbreviation", 
+            "type": "STRING"
+          }, 
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE", 
+                "name": "loss", 
+                "type": "INTEGER"
+              }, 
+              {
+                "mode": "NULLABLE", 
+                "name": "win", 
+                "type": "INTEGER"
+              }
+            ], 
+            "mode": "NULLABLE", 
+            "name": "record", 
+            "type": "RECORD"
+          }, 
+          {
+            "mode": "NULLABLE", 
+            "name": "name", 
+            "type": "STRING"
+          }
+        ], 
+        "mode": "NULLABLE", 
+        "name": "visitTeam", 
+        "type": "RECORD"
+      }, 
+      {
+        "mode": "NULLABLE", 
+        "name": "season", 
+        "type": "INTEGER"
+      }, 
+      {
+        "fields": [
+          {
+            "mode": "REPEATED", 
+            "name": "tag", 
+            "type": "STRING"
+          }, 
+          {
+            "mode": "NULLABLE", 
+            "name": "ref", 
+            "type": "STRING"
+          }
+        ], 
+        "mode": "REPEATED", 
+        "name": "link", 
+        "type": "RECORD"
+      }, 
+      {
+        "mode": "NULLABLE", 
+        "name": "league", 
+        "type": "STRING"
+      }, 
+      {
+        "fields": [
+          {
+            "mode": "NULLABLE", 
+            "name": "abbreviation", 
+            "type": "STRING"
+          }, 
+          {
+            "fields": [
+              {
+                "mode": "NULLABLE", 
+                "name": "loss", 
+                "type": "INTEGER"
+              }, 
+              {
+                "mode": "NULLABLE", 
+                "name": "win", 
+                "type": "INTEGER"
+              }
+            ], 
+            "mode": "NULLABLE", 
+            "name": "record", 
+            "type": "RECORD"
+          }, 
+          {
+            "mode": "NULLABLE", 
+            "name": "name", 
+            "type": "STRING"
+          }
+        ], 
+        "mode": "NULLABLE", 
+        "name": "homeTeam", 
+        "type": "RECORD"
+      }, 
+      {
+        "mode": "NULLABLE", 
+        "name": "status", 
+        "type": "STRING"
+      }, 
+      {
+        "mode": "NULLABLE", 
+        "name": "gameId", 
+        "type": "STRING"
+      }
+    ]
+  }, 
+  "selfLink": "https://bigquery.googleapis.com/bigquery/v2/projects/burnished-case-265021/datasets/boxscores/tables/boxscoresNBA", 
+  "tableReference": {
+    "datasetId": "boxscores", 
+    "projectId": "burnished-case-265021", 
+    "tableId": "boxscoresNBA"
+  }, 
+  "type": "TABLE"
+}

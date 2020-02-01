@@ -143,7 +143,7 @@ func (s *ScoreService) BoxScoreService(ctx context.Context) (*nba.SportsEvent, *
 	return event, resp, err
 }
 
-//PlayerMovementStatsService will, for a http client, return a StatsTLN JSON object ( note that this is not yet normalized to structures)
+//NBAPlayerMovementStatsService will, for a http client, return a StatsTLN JSON object ( note that this is not yet normalized to structures)
 func (s *StatsService) NBAPlayerMovementStatsService(ctx context.Context) (*nba.StatsTLN, *Response, error) {
 
 	s.client.BaseURL, _ = url.Parse(nba.NBAStatsBaseURL)

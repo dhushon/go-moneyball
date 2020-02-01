@@ -73,7 +73,7 @@ import (
 	"os"
 )
 
-//BoxScoreService provides a fetcher for ESPN's scoreboard API that will pull the latest scoreboard (todays games & results)
+//ESPNBoxScoreService provides a fetcher for ESPN's scoreboard API that will pull the latest scoreboard (todays games & results)
 func (s *ScoreService) ESPNBoxScoreService(ctx context.Context) (*(espn.ScoreBoard), *Response, error) {
 
 	s.client.BaseURL, _ = url.Parse(espn.EspnBaseURL)
@@ -97,7 +97,7 @@ func (s *ScoreService) ESPNBoxScoreService(ctx context.Context) (*(espn.ScoreBoa
 	return sb, resp, err
 }
 
-//TeamsService will, for a http client, return a ScoreBoard JSON object
+//ESPNTeamsService will, for a http client, return a ScoreBoard JSON object
 //
 func (s *StatsService) ESPNTeamsService(ctx context.Context) (*espn.TeamSport, *Response, error) {
 
