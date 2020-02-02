@@ -265,11 +265,10 @@ func main() {
 	var bsc = ScoreBoard{
 		[]BoxScore{
 			BoxScore{EntityID{"2019-12-28.WSH.DET",nil,""}, "2019-12-28.WSH.DET", "NBA", Season{2019, 1},
-				&Competitor{EntityID{"DET-NBA-2019",nil,""}, "Detroit Pistons", "DET", Record{0, 1, []Item{}}, &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
-				&Competitor{EntityID{"WAS-NBA-2019",nil,""}, "Washington Wizards", "WAS", Record{1, 0, []Item{}}, &[]Score{}, "Washington", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"DET-NBA-2019",nil,""}, "Detroit Pistons", "DET", Record{0, 1, []Item{}},0,  &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"WAS-NBA-2019",nil,""}, "Washington Wizards", "WAS", Record{1, 0, []Item{}},0, &[]Score{}, "Washington", "0E3764", "e31837", true, false, nil},
 				&Venue{EntityID{}, "", "Little Caesars Arena", &Address{}, 10000, true},
 				&GameStatus{0.0,0,"Final","Thu, December 28th at 7:00 PM EST"},
-				&GameScore{0, 0},
 				&[]Link{
 					Link{"http://www.espn.com/nba/team/roster/_/name/det/detroit-pistons",
 						[]string{"roster"}, "roster",nil, false},
@@ -277,11 +276,10 @@ func main() {
 				&GameDetail{},
 			},
 			BoxScore{EntityID{"2017-02-03.TOR.BOS",nil,""}, "2017-02-03.TOR.BOS", "NBA", Season{2017, 1},
-				&Competitor{EntityID{"TOR-NBA-2017",nil,""}, "Toronto Raptors", "TOR", Record{1, 0, []Item{}}, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
-				&Competitor{EntityID{"BOS-NBA-2017",nil,""}, "Boston Celtics", "BOS", Record{0, 1, []Item{}}, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"TOR-NBA-2017",nil,""}, "Toronto Raptors", "TOR", Record{1, 0, []Item{}}, 109, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"BOS-NBA-2017",nil,""}, "Boston Celtics", "BOS", Record{0, 1, []Item{}}, 104, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
 				&Venue{EntityID{}, "", "TD Garden", &Address{}, 10000, true},
 				&GameStatus{0.0,0,"Final","Thu, February 3rd at 7:00 PM EST"},
-				&GameScore{109, 104},
 				&[]Link{},
 				&GameDetail{},
 			},

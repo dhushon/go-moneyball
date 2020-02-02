@@ -1,4 +1,4 @@
-package infoservice
+package main
 
 /**
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved
@@ -32,26 +32,41 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"context"
-	"moneyball/go-moneyball/moneyball/infoservice"
+	"fmt"
+	"moneyball/go-moneyball/moneyball/espn"
 	"testing"
+
+	"github.com/davecgh/go-spew/spew"
 	"github.com/stretchr/testify/assert"
 )
 
 func TestESPNScoreBoardService(t *testing.T) {
-	client := infoservice.NewClient(nil)
+	client := NewClient(nil)
 	ctx := context.Background()
 	//get the current scoreboard
-	scoreboard, _, err := client.Stats.ScoreBoardService(ctx)
+	scoreboard, _, err := client.Score.ESPNBoxScoreService(ctx)
 	assert.Nil(t, err, err)
 	//fmt.Printf("ScoreBoardService: %d scores for date %s retrieved\n", len(scoreboard.Events), scoreboard.Day.Date)
 	assert.NotZero(t, len(scoreboard.Events), t.Name()+" espnScoreboard positive length response")
 	//fmt.Printf("Response: %#v\n", scoreboard)
 }
 
-func TestESPNTeamService(t *testing.T) {
-	client := infoservice.NewClient(nil)
+func TestESPNScoreBoardMarshalService(t *testing.T) {
+	client := NewClient(nil)
 	ctx := context.Background()
-	teams, _, err := client.Stats.TeamsService(ctx)
+	//get the current scoreboard
+	scoreboard, _, err := client.Score.ESPNBoxScoreService(ctx)
+	assert.Nil(t, err, err)
+	sb, err := espn.MarshalMS(scoreboard)
+	spew.Printf("scoreboard: %#v \n ms.scoreboard: %#+v\n", scoreboard, sb)
+	fmt.Printf("what'd we get %#v", sb)
+
+}
+
+func TestESPNTeamService(t *testing.T) {
+	client := NewClient(nil)
+	ctx := context.Background()
+	teams, _, err := client.Schedule.client.Stats.ESPNTeamsService(ctx)
 	assert.Nil(t, err, err)
 	assert.NotZero(t, len(teams.Sport[0].Leagues[0].Teams) > 0, "espnTeams should be a positive length response")
 	//fmt.Printf("TeamsService: %d teams for date retrieved %#v\n", len(teams.Sport[0].Leagues[0].Teams), teams.Sport[0].Leagues[0].Teams)

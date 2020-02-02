@@ -37,18 +37,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"context"
 	"fmt"
-	"moneyball/go-moneyball/moneyball/infoservice"
+	"moneyball/go-moneyball/moneyball/espn"
 	"time"
+
+	"github.com/davecgh/go-spew/spew"
 	//"golang.org/x/oauth2"
-)
-
-const (
-	defaultBaseURL = "https://site.api.espn.com/"
-	userAgent      = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_6) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/13.0 Safari/605.1.15"
-
-	headerRateLimit     = "X-RateLimit-Limit"
-	headerRateRemaining = "X-RateLimit-Remaining"
-	headerRateReset     = "X-RateLimit-Reset"
 )
 
 /**
@@ -65,7 +58,7 @@ func main() {
 	client := NewClient(tc)
 	*/
 	// if using oath2 comment rest
-	client := infoservice.NewClient(nil)
+	client := NewClient(nil)
 	ctx := context.Background()
 
 	schedParams := map[string]string{
@@ -125,12 +118,15 @@ func main() {
 	if err != nil {
 		fmt.Printf("ScoreBoardService: Error: %s\n", err)
 	}
-	fmt.Printf("ScoreBoardService: %d scores for date %s retrieved\n", len(scoreboard.Events), scoreboard.Day.Date)
-	fmt.Printf("Response: %#v\n", scoreboard)
+	sb, _ := espn.MarshalMS(scoreboard)
+	spew.Printf("espn.ScoreBoard: %v\n\n", scoreboard)
+	spew.Printf("ms.ScoreBoard: %v\n\n", sb)
+
 	teams, _, err := client.Stats.ESPNTeamsService(ctx)
 	if err != nil {
 		fmt.Printf("TeamsService: Error %s\n", err)
 	}
-	fmt.Printf("TeamsService: %d teams for date retrieved\n", len(teams.Sport[0].Leagues[0].Teams))
+	_ = teams
+	//fmt.Printf("TeamsService: %d teams for date retrieved\n", len(teams.Sport[0].Leagues[0].Teams))
 
 }

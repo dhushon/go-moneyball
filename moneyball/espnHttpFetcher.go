@@ -1,4 +1,4 @@
-package infoservice
+package main
 
 /**
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved

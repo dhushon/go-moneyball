@@ -1,4 +1,4 @@
-package infoservice
+package main
 
 /**
 Copyright (c) 2013 The go-github AUTHORS. All rights reserved.

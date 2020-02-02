@@ -52,18 +52,19 @@ type Competitor struct {
 	Name           string   `json:"name,omitempty"`
 	Abbreviation   string   `json:"abbreviation"`
 	Record         Record   `json:"record,omitempty"`
+	Score		   int		`json:"score"`
 	LineScore      *[]Score `json:"linescore,omitempty"` //"linescore":[{"score":"30"},{"score":"32"},{"score":"23"},{"score":"19"}]},
 	Location       string   `json:"location"`
 	Color          string   `json:"color"`
 	AlternateColor string   `json:"alternateColor"`
 	IsActive       bool     `json:"isActive"`
 	IsAllStar      bool     `json:"isAllStar"`
-	Link           *Link    `json:"logos"`
+	Links          *[]Link  `json:"logos"`
 }
 
 //Score ... used in linescore to show period score for a team/competitor
 type Score struct {
-	Score int `json:"score,omitempty"`
+	Score float32 `json:"score,omitempty"`
 }
 
 //Record ... win/loss record for team
@@ -109,12 +110,6 @@ type GameStatus struct {
 	Detail       string 		`json:"detail,omitempty"`
 }
 
-//GameScore ...
-type GameScore struct {
-	HomeScore  int `json:"home"`
-	VisitScore int `json:"away"`
-}
-
 //Link ...
 type Link struct {
 	HRef string   `json:"href"`          //"http://www.espn.com/nba/team/_/name/tor/toronto-raptors",
@@ -148,8 +143,7 @@ type BoxScore struct {
 	HomeTeam   *Competitor `json:"homeTeam"`
 	VisitTeam  *Competitor `json:"visitTeam"`
 	Venue      *Venue      `json:"location,omitempty"`
-	Status     *GameStatus  `json:"status,omitempty"`
-	Score      *GameScore  `json:"gamescore,omitempty"`
+	Status     *GameStatus `json:"status,omitempty"`
 	Links      *[]Link     `json:"link,omitempty"`
 	GameDetail *GameDetail `json:"gameDetail,omitempty"`
 }
@@ -159,8 +153,8 @@ type GameDetail struct {
 	StartTime           *time.Time  `json:"startTimeUTC,omitempty"`     //"startTimeUTC":"2019-10-01T00:00:00.000Z",
 	StartDateEastern    string      `json:"startDateEastern,omitempty"` //"startDateEastern":"20190930",
 	StartTimeEastern    string      `json:"startTimeEastern,omitempty"`
-	Period              *GamePeriod `json:"period,omitempty,omitempty"` // "period": {}
-	Attendance          string      `json:"attendance,omitempty"`       //"attendance":"18624",
+	Period              *GamePeriod `json:"period,omitempty"` // "period": {}
+	Attendance          int         `json:"attendance,omitempty"`       //"attendance":"18624",
 	GameDurationMinutes int         `json:"gameDuration,omitempty"`
 }
 

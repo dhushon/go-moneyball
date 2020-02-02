@@ -1,4 +1,4 @@
-package infoservice
+package main
 
 /**
 Copyright (c) 2020 DXC Technology - Dan Hushon. All rights reserved
@@ -33,6 +33,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"context"
 	"testing"
+
 	"github.com/stretchr/testify/assert"
 )
 
@@ -67,7 +68,7 @@ func TestPlayerMovementStatsService(t *testing.T) {
 	client := NewClient(nil)
 	ctx := context.Background()
 	// tests for PlayerMovement service from nba... this is used to show player roster changes (but seems to be non-authoritative)
-	statstln, _, err := client.Stats.PlayerMovementStatsService(ctx)
+	statstln, _, err := client.Stats.NBAPlayerMovementStatsService(ctx)
 	assert.Nil(t, err, err)
 	assert.NotZero(t, len(statstln.StatGroup) > 0, "StatGroup should not be nil")
 	//fmt.Printf("NBAPlayerMovementStatsService: %s StatName with values of %#v retrieved\n", statstln.StatGroupName, statstln.StatGroup)
