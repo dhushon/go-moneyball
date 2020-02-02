@@ -66,6 +66,7 @@ import (
 	"encoding/json"
 	"strings"
 	"time"
+	"moneyball/go-moneyball/moneyball/ms"
 )
 
 const (
@@ -128,7 +129,7 @@ type Date struct {
 
 //Event ...
 type Event struct {
-	Extracted    time.Time     `json:"extract_time,omitempty"`
+	Extracted    *time.Time     `json:"extract_time,omitempty"`
 	ExtractedSrc string        `json:"extract_src,omitempty"`
 	ID           string        `json:"id" binding:"required"`
 	UID          string        `json:"uid" binding:"required"`
@@ -419,3 +420,128 @@ type Sport struct {
 type TeamSport struct {
 	Sport []Sport `json:"sports"`
 }
+
+//MarshalMS marshalls espn.Scoreboard structures to ms.Scoreboard structures, can return partial results
+//in the case of one event causing an error deep in the array
+func MarshalMS(s ScoreBoard) (*ms.ScoreBoard, error) {
+	sb := ms.ScoreBoard{}
+	bs := []ms.BoxScore{}
+	for _, event := range s.Events {
+		s, err := marshalMSEvent(event, s.Leagues[0])
+		bs = append(bs, *s)
+		if (err == nil) {
+			sb.BoxScores = bs
+			return &sb, err
+		}
+	}
+	sb.BoxScores = bs
+	return &sb,nil
+}
+
+//marshalMS marshals espn.Event to ms.BoxScore
+func marshalMSEvent(e Event, l League) (*ms.BoxScore, error) {
+	bs := ms.BoxScore{}
+	/* BoxScore
+	EntityID
+	GameID     GameID      `json:"gameId"`
+	League     League      `json:"league"`
+	Season     Season      `json:"season"`
+	HomeTeam   *Competitor `json:"homeTeam"`
+	VisitTeam  *Competitor `json:"visitTeam"`
+	Venue      *Venue      `json:"location,omitempty"`
+	Status     *GameStatus  `json:"status,omitempty"`
+	Score      *GameScore  `json:"gamescore,omitempty"`
+	Links      *[]Link     `json:"link,omitempty"`
+	GameDetail *GameDetail `json:"gameDetail,omitempty"`
+	*/
+	eID := ms.EntityID{}
+	eID.Extracted = e.Extracted
+	eID.ExtractedSrc = e.ExtractedSrc
+	bs.GameID = ms.GameID(e.ID)
+    bs.League = ms.League(l.Abbreviation)
+	bs.Season = ms.Season{e.Season.Year, e.Season.Type}
+
+	bs.Status, _ = marshalMSGameStatus(e.Status)
+
+	links := []ms.Link{}
+	for _, link := range e.Links {
+		l, _ := marshalMSLink(link)
+		links = append(links, *l)
+	}
+	bs.Links = &links
+	
+	/* Event 
+	Extracted    *time.Time     `json:"extract_time,omitempty"`
+	ExtractedSrc string        `json:"extract_src,omitempty"`
+	ID           string        `json:"id" binding:"required"`
+	UID          string        `json:"uid" binding:"required"`
+	Date         espnTime      `json:"date"`
+	Name         string        `json:"name"`
+	ShortName    string        `json:"shortName"`
+	Season       SeasonShort   `json:"season"`
+	Competitions []Competition `json:"competitions"`
+	Links        []Link        `json:"links"`
+	Status       GameStatus    `json:"status"`
+	*/
+  	return &bs, nil
+}
+
+func marshalMSCompetitor(t Team) (*ms.Competitor, error) {
+	/*
+	type Team struct {
+	ID               string        `json:"id" binding:"required"`
+	UID              string        `json:"uid" binding:"required"`
+	Slug             string        `json:"slug,omitempty"`
+	Location         string        `json:"location,omitempty"`         //"Toronto",
+	Name             string        `json:"name,omitempty"`             // "Raptors"
+	Abbreviation     string        `json:"abbreviation,omitempty"`     // "TOR"
+	DisplayName      string        `json:"displayName,omitempty"`      // "Toronto Raptors"
+	ShortDisplayName string        `json:"shortDisplayName,omitempty"` // Raptors
+	Color            string        `json:"color,omitempty"`            //"CEOF41"
+	AlternateColor   string        `json:"alternateColor,omitempty"`   //"061922"
+	IsActive         bool          `json:"isActive"`
+	IsAllStar        bool          `json:"isAllStar"`
+	Venue            Venue         `json:"venue"`
+	Links            []Link        `json:"links,omitempty"`
+	Logos            []Link        `json:"logos,omitempty"`
+	Logo             string        `json:"logo,omitempty"`
+	Score            string        `json:"score,omitempty"`
+	Linescores       []Linescore   `json:"linescores,omitempty"`
+	Record           []RecordItems `json:"record,omitempty"`}*/
+	/*
+	type Competitor struct {
+	EntityID
+	Name           string   `json:"name,omitempty"`
+	Abbreviation   string   `json:"abbreviation"`
+	Record         Record   `json:"record,omitempty"`
+	LineScore      *[]Score `json:"linescore,omitempty"` //"linescore":[{"score":"30"},{"score":"32"},{"score":"23"},{"score":"19"}]},
+	Location       string   `json:"location"`
+	Color          string   `json:"color"`
+	AlternateColor string   `json:"alternateColor"`
+	IsActive       bool     `json:"isActive"`
+	IsAllStar      bool     `json:"isAllStar"`
+	Link           *Link    `json:"logos"`}*/
+
+}
+
+func marshalMSGameStatus(gs GameStatus) (*ms.GameStatus, error) {
+	return &ms.GameStatus{gs.Clock, gs.Period, gs.StatusType.State, gs.StatusType.Detail}, nil
+}
+
+func marshalMSLink(l Link) (*ms.Link, error) {
+	link := ms.Link{}
+	if (l.Logo != "") {
+		//we have a logo reference... so we need dimensions
+		link.HRef = l.Logo
+		link.IsLogo = true
+	} else {
+		link.HRef = l.HRef
+	}
+	link.Rel = l.Rel
+	link.Alt = l.Text
+	link.Dimension = &ms.LinkDimensions{l.Width, l.Height}
+	return &link, nil
+}
+
+
+

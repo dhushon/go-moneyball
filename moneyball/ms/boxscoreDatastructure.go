@@ -58,18 +58,7 @@ type Competitor struct {
 	AlternateColor string   `json:"alternateColor"`
 	IsActive       bool     `json:"isActive"`
 	IsAllStar      bool     `json:"isAllStar"`
-	Logo           *Logo    `json:"logos"`
-}
-
-//Logo is an image...
-type Logo struct {
-	Image
-}
-
-//Image is a link that has dimensions
-type Image struct {
-	Link
-	Dimension LinkDimensions `json:"dimensions"`
+	Link           *Link    `json:"logos"`
 }
 
 //Score ... used in linescore to show period score for a team/competitor
@@ -113,7 +102,12 @@ type Address struct {
 }
 
 //GameStatus ...
-type GameStatus string
+type GameStatus struct {
+	Clock        float32        `json:"clock"`
+	Period       int            `json:"period"`
+	State 		 string 		`json:"description,omitempty"`
+	Detail       string 		`json:"detail,omitempty"`
+}
 
 //GameScore ...
 type GameScore struct {
@@ -126,6 +120,8 @@ type Link struct {
 	HRef string   `json:"href"`          //"http://www.espn.com/nba/team/_/name/tor/toronto-raptors",
 	Rel  []string `json:"rel,omitempty"` // ["clubhouse","desktop","team"],
 	Alt  string   `json:"alt,omitempty"` // "Clubhouse"
+	Dimension *LinkDimensions `json:"dimensions,omitempty"`
+	IsLogo bool   `json:"isLogo"`
 }
 
 //LinkDimensions ...
@@ -137,7 +133,10 @@ type LinkDimensions struct {
 // EntityID provides the Monumental Foreign key resolution for key types, like Games, Players, Teams that help to resolve
 // across a variety of source API's and data bases
 type EntityID struct {
-	ID string `json:"id"`
+	ID string 				    `json:"id"`
+	Extracted    *time.Time     `json:"extract_time,omitempty"`
+	ExtractedSrc string         `json:"extract_src,omitempty"`
+	
 }
 
 //BoxScore ...
@@ -149,7 +148,7 @@ type BoxScore struct {
 	HomeTeam   *Competitor `json:"homeTeam"`
 	VisitTeam  *Competitor `json:"visitTeam"`
 	Venue      *Venue      `json:"location,omitempty"`
-	Status     GameStatus  `json:"status,omitempty"`
+	Status     *GameStatus  `json:"status,omitempty"`
 	Score      *GameScore  `json:"gamescore,omitempty"`
 	Links      *[]Link     `json:"link,omitempty"`
 	GameDetail *GameDetail `json:"gameDetail,omitempty"`
@@ -174,8 +173,8 @@ type GamePeriod struct {
 	IsEndOfPeriod bool `json:"isEndOfPeriod"` //"isEndOfPeriod":false
 }
 
-//Scoreboard ... holding structure for a set of BoxScores
-type Scoreboard struct {
+//ScoreBoard ... holding structure for a set of BoxScores
+type ScoreBoard struct {
 	BoxScores []BoxScore
 }
 

@@ -146,7 +146,7 @@ func (bs *BoxScore) tableName() string {
 	return ("boxscores" + tn)
 }
 
-func (sb *Scoreboard) tableName() string {
+func (sb *ScoreBoard) tableName() string {
 	if len(sb.BoxScores) > 0 {
 		return string("boxscores" + sb.BoxScores[0].League)
 	}
@@ -161,7 +161,7 @@ func (bs *BoxScore) marshalNBJSON(b *bytes.Buffer) error {
 	return nil
 }
 
-func (sb *Scoreboard) marshalNBJSON(b *bytes.Buffer) error {
+func (sb *ScoreBoard) marshalNBJSON(b *bytes.Buffer) error {
 	r := ndjson.NewWriter(b)
 	for i := 0; i < len(sb.BoxScores); i++ {
 		if err := r.Encode(sb.BoxScores[i]); err != nil {
@@ -185,7 +185,7 @@ func writeFile(filename string, b *bytes.Buffer) {
 
 //InsertRow 1 row into named project and dataset.  note that BigQuery supports
 //Newline Delimited JSON (ndjson) so we need to determine if we have a singleton or an array
-func InsertRow(projectID string, datasetID string, s *Scoreboard) error {
+func InsertRow(projectID string, datasetID string, s *ScoreBoard) error {
 	ctx := context.Background()
 	client, err := bigquery.NewClient(ctx, projectID)
 	defer client.Close()
@@ -262,25 +262,25 @@ func CreateTable(projectID, datasetID string, tableID string, metadata *bigquery
 }
 
 func main() {
-	var bsc = Scoreboard{
+	var bsc = ScoreBoard{
 		[]BoxScore{
-			BoxScore{EntityID{"2019-12-28.WSH.DET"}, "2019-12-28.WSH.DET", "NBA", Season{2019, 1},
-				&Competitor{EntityID{"DET-NBA-2019"}, "Detroit Pistons", "DET", Record{0, 1, []Item{}}, &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
-				&Competitor{EntityID{"WAS-NBA-2019"}, "Washington Wizards", "WAS", Record{1, 0, []Item{}}, &[]Score{}, "Washington", "0x0000", "0xffff", true, false, nil},
+			BoxScore{EntityID{"2019-12-28.WSH.DET",nil,""}, "2019-12-28.WSH.DET", "NBA", Season{2019, 1},
+				&Competitor{EntityID{"DET-NBA-2019",nil,""}, "Detroit Pistons", "DET", Record{0, 1, []Item{}}, &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"WAS-NBA-2019",nil,""}, "Washington Wizards", "WAS", Record{1, 0, []Item{}}, &[]Score{}, "Washington", "0x0000", "0xffff", true, false, nil},
 				&Venue{EntityID{}, "", "Little Caesars Arena", &Address{}, 10000, true},
-				"Scheduled",
+				&GameStatus{0.0,0,"Final","Thu, December 28th at 7:00 PM EST"},
 				&GameScore{0, 0},
 				&[]Link{
 					Link{"http://www.espn.com/nba/team/roster/_/name/det/detroit-pistons",
-						[]string{"roster"}, "roster"},
+						[]string{"roster"}, "roster",nil, false},
 				},
 				&GameDetail{},
 			},
-			BoxScore{EntityID{"2017-02-03.TOR.BOS"}, "2017-02-03.TOR.BOS", "NBA", Season{2017, 1},
-				&Competitor{EntityID{"TOR-NBA-2017"}, "Toronto Raptors", "TOR", Record{1, 0, []Item{}}, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
-				&Competitor{EntityID{"BOS-NBA-2017"}, "Boston Celtics", "BOS", Record{0, 1, []Item{}}, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
+			BoxScore{EntityID{"2017-02-03.TOR.BOS",nil,""}, "2017-02-03.TOR.BOS", "NBA", Season{2017, 1},
+				&Competitor{EntityID{"TOR-NBA-2017",nil,""}, "Toronto Raptors", "TOR", Record{1, 0, []Item{}}, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"BOS-NBA-2017",nil,""}, "Boston Celtics", "BOS", Record{0, 1, []Item{}}, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
 				&Venue{EntityID{}, "", "TD Garden", &Address{}, 10000, true},
-				"Final",
+				&GameStatus{0.0,0,"Final","Thu, February 3rd at 7:00 PM EST"},
 				&GameScore{109, 104},
 				&[]Link{},
 				&GameDetail{},
