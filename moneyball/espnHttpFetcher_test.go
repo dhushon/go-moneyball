@@ -33,7 +33,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"context"
 	"fmt"
-	"moneyball/go-moneyball/moneyball/espn"
 	"testing"
 
 	"github.com/davecgh/go-spew/spew"
@@ -57,7 +56,7 @@ func TestESPNScoreBoardMarshalService(t *testing.T) {
 	//get the current scoreboard
 	scoreboard, _, err := client.Score.ESPNBoxScoreService(ctx)
 	assert.Nil(t, err, err)
-	sb, err := espn.MarshalMS(scoreboard)
+	sb, err := scoreboard.MarshalMS()
 	spew.Printf("scoreboard: %#v \n ms.scoreboard: %#+v\n", scoreboard, sb)
 	fmt.Printf("what'd we get %#v", sb)
 

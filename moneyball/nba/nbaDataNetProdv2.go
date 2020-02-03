@@ -39,7 +39,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //REF: http://nbasense.com/nba-api/Data/Cms/Game/Boxscore
 
 import (
+	"fmt"
+	"moneyball/go-moneyball/moneyball/ms"
 	"time"
+	"strconv"
 )
 
 const (
@@ -76,7 +79,7 @@ type InternalProdv2 struct {
 
 //LeagueSchedulev2 ... we don't understand what happens with non-standard?
 type LeagueSchedulev2 struct {
-	Standard []ScheduledGamev2 `json:"standard"` //"standard":{}
+	Events []ScheduledGamev2 `json:"standard"` //"standard":{}
 }
 
 //ScheduledGamev2 ... based upon this structure
@@ -146,4 +149,100 @@ type Arena struct {
 //Scorev2 - used for linescores
 type Scorev2 struct {
 	Score FlexInt `json:"score"`
+}
+
+//MarshalMS marshalls espn.Scoreboard structures to ms.Scoreboard structures, can return partial results
+//in the case of one event causing an error deep in the array
+func MarshalMS(s *LeagueSchedulev2) (*ms.ScoreBoard, error) {
+	sb := ms.ScoreBoard{}
+	bs := []ms.Event{}
+	for _, event := range s.Events {
+		evented, err := (&event).MarshalMSEvent()
+		bs = append(bs, *evented)
+		if err != nil {
+			sb.Events = bs
+			return &sb, err
+		}
+	}
+	sb.Events = bs
+	return &sb, nil
+}
+
+//MarshalMSEvent marshals nba.Event to ms.BoxScore
+func (e *ScheduledGamev2) MarshalMSEvent() (*ms.Event, error) {
+	bs := ms.Event{}
+	/* ms.Event
+	EntityID
+	GameID     GameID      `json:"gameId"`
+	League     League      `json:"league"`
+	Season     Season      `json:"season"`
+	HomeTeam   *Competitor `json:"homeTeam"`
+	VisitTeam  *Competitor `json:"visitTeam"`
+	Venue      *Venue      `json:"location,omitempty"`
+	Status     *GameStatus  `json:"status,omitempty"`
+	Links      *[]Link     `json:"link,omitempty"`
+	GameDetail *GameDetail `json:"gameDetail,omitempty"`
+	*/
+	eID := ms.EntityID{}
+	//eID.Extracted = e.Extracted
+	//eID.ExtractedSrc = e.ExtractedSrc
+	bs.EntityID = eID
+	bs.GameID = ms.GameID(e.GameID)
+	bs.League = ms.League("NBA")
+	bs.Season = ms.Season{int((*e).SeasonYear), (*e).SeasonStageID}
+	bs.HomeTeam, _ = (*e).HomeTeam.marshalMSTeam()
+	bs.VisitTeam, _ = (*e).VisitingTeam.marshalMSTeam()
+	//TODO: Venue
+
+	bs.GameDetail = e.marshalMSGameDetail()
+
+	ms.MasterIdentity(&bs)
+	return &bs, nil
+}
+
+func (e *ScheduledGamev2) marshalMSGameDetail() (*ms.GameDetail) {
+	/*
+	type GameDetail struct {
+	StartTime           *time.Time  `json:"startTimeUTC,omitempty"`     //"startTimeUTC":"2019-10-01T00:00:00.000Z",
+	StartDateEastern    string      `json:"startDateEastern,omitempty"` //"startDateEastern":"20190930",
+	StartTimeEastern    string      `json:"startTimeEastern,omitempty"`
+	Period              *GamePeriod `json:"period,omitempty"`     // "period": {}
+	Attendance          int         `json:"attendance,omitempty"` //"attendance":"18624",
+	GameDurationMinutes int         `json:"gameDuration,omitempty"`
+	}*/
+	gd := ms.GameDetail{}
+	refTime := time.Time((*e).StartTime)
+	fmt.Printf("timeRef %s\n", refTime)
+	gd.StartTime = &refTime
+	location, err := time.LoadLocation("America/New_York")
+	if err != nil {
+		// set error
+		fmt.Printf("error: timezone conversion %#v\n", err)
+	}
+	est := refTime.In(location)
+	fmt.Printf("time: UTC %s, EST %s\n", refTime, est)
+
+	gd.StartDateEastern = est.Format("2006-01-02")
+	gd.StartTimeEastern = est.Format("15:04:05")
+	//gd.StartDateEastern = (*e).StartDateEastern  // ignore initial - wrong formatting
+	//gd.StartTimeEastern = (*e).StartTimeEastern  // ignore initial - wrong formatting
+	//TODO: Period
+	gd.Attendance, _ = strconv.Atoi((*e).Attendance)
+	gd.GameDurationMinutes = ((int((*e).GameDuration.Hours)*60)+int((*e).GameDuration.Minutes))
+	return &gd
+}
+
+func (t GameTeamv2) marshalMSTeam() (*ms.Competitor, error) {
+	c := ms.Competitor{}
+	c.ID = t.TeamID
+	c.Abbreviation = t.TriCode
+	//c.Record = t.
+	linescores := []ms.Score{}
+	for _, lsc := range t.Linescore {
+		linescores = append(linescores, ms.Score{float32(lsc.Score)})
+		fmt.Printf("linescore %v", linescores)
+	}
+	c.LineScore = &linescores
+	c.Score = int(t.Score)
+	return &c, nil
 }

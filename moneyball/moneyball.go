@@ -37,7 +37,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"context"
 	"fmt"
-	"moneyball/go-moneyball/moneyball/espn"
 	"time"
 
 	"github.com/davecgh/go-spew/spew"
@@ -118,7 +117,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("ScoreBoardService: Error: %s\n", err)
 	}
-	sb, _ := espn.MarshalMS(scoreboard)
+	sb, _ := scoreboard.MarshalMS()
 	spew.Printf("espn.ScoreBoard: %v\n\n", scoreboard)
 	spew.Printf("ms.ScoreBoard: %v\n\n", sb)
 

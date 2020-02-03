@@ -32,7 +32,11 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"context"
+	"fmt"
 	"testing"
+	"time"
+
+	"github.com/davecgh/go-spew/spew"
 
 	"github.com/stretchr/testify/assert"
 )
@@ -62,6 +66,51 @@ func TestNBAScheduleServicev2(t *testing.T) {
 	assert.Nil(t, err, err)
 	assert.NotZero(t, len(*schedule) > 0)
 	//fmt.Printf("NBAScheduleService: %d with values %#v retrieved\n", len(*schedule), (*schedule)[0])
+}
+
+func TestNBABoxScoreServicev2(t *testing.T) {
+	fmt.Println("Starting TestNBABoxSCoreServicev2...\n----")
+	client := NewClient(nil)
+	ctx := context.Background()
+	schedParams := map[string]string{
+		"year": "2019", //2019 season (current)
+	}
+	schedule, _, err := client.Schedule.NBAScheduleServicev2(ctx, schedParams)
+	assert.Nil(t, err, err)
+	fmt.Printf("NBAScheduleService: %d with values %#v retrieved\n", len(*schedule), (*schedule)[0])
+	//getTodayGames(schedule)
+	todayStart := time.Now()
+	tomorrow := todayStart.AddDate(0, 0, 1)
+	counter := 0
+	for i, game := range *schedule {
+		if game.StartTime.After(todayStart) && game.StartTime.Before(tomorrow) {
+			//have a game I care about
+			counter = counter + 1
+			fmt.Printf("today game id: %s, start: %s %s, url: %s\n", game.GameID, game.StartTimeEastern, game.StartDateEastern, game.GameURLCode)
+			// go get details.
+			params := map[string]string{
+				"gamedate": game.StartDateEastern,
+				"gameid":   game.GameID,
+			}
+			temp, _, err := client.Score.NBABoxScoreServicev2(ctx, params)
+			assert.Nil(t, err, err)
+			ev, _ := temp.MarshalMSEvent()
+			spew.Printf("nba.Event: %#v \n ms.Event: %#+v\n", temp, ev)
+
+			if err != nil {
+				fmt.Printf("BoxScoreService: Error %s\n", err)
+			} else {
+				// replace existing game with the detailed box.
+				fmt.Printf("orig_game %s", game.GameURLCode)
+				(*schedule)[i] = *temp
+				fmt.Printf("new game %#v", (*schedule)[i])
+				// could build independent array of games or add detail or...
+
+			}
+			fmt.Printf("next\n")
+		}
+	}
+
 }
 
 func TestPlayerMovementStatsService(t *testing.T) {

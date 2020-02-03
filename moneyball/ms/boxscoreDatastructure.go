@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import (
+	"fmt"
 	"time"
 )
 
@@ -52,7 +53,7 @@ type Competitor struct {
 	Name           string   `json:"name,omitempty"`
 	Abbreviation   string   `json:"abbreviation"`
 	Record         Record   `json:"record,omitempty"`
-	Score		   int		`json:"score"`
+	Score          int      `json:"score"`
 	LineScore      *[]Score `json:"linescore,omitempty"` //"linescore":[{"score":"30"},{"score":"32"},{"score":"23"},{"score":"19"}]},
 	Location       string   `json:"location"`
 	Color          string   `json:"color"`
@@ -104,19 +105,19 @@ type Address struct {
 
 //GameStatus ...
 type GameStatus struct {
-	Clock        float32        `json:"clock"`
-	Period       int            `json:"period"`
-	State 		 string 		`json:"description,omitempty"`
-	Detail       string 		`json:"detail,omitempty"`
+	Clock  float32 `json:"clock"`
+	Period int     `json:"period"`
+	State  string  `json:"description,omitempty"`
+	Detail string  `json:"detail,omitempty"`
 }
 
 //Link ...
 type Link struct {
-	HRef string   `json:"href"`          //"http://www.espn.com/nba/team/_/name/tor/toronto-raptors",
-	Rel  []string `json:"rel,omitempty"` // ["clubhouse","desktop","team"],
-	Alt  string   `json:"alt,omitempty"` // "Clubhouse"
+	HRef      string          `json:"href"`          //"http://www.espn.com/nba/team/_/name/tor/toronto-raptors",
+	Rel       []string        `json:"rel,omitempty"` // ["clubhouse","desktop","team"],
+	Alt       string          `json:"alt,omitempty"` // "Clubhouse"
 	Dimension *LinkDimensions `json:"dimensions,omitempty"`
-	IsLogo bool   `json:"isLogo"`
+	IsLogo    bool            `json:"isLogo"`
 }
 
 //LinkDimensions ...
@@ -128,15 +129,14 @@ type LinkDimensions struct {
 // EntityID provides the Monumental Foreign key resolution for key types, like Games, Players, Teams that help to resolve
 // across a variety of source API's and data bases
 type EntityID struct {
-	ID string 				    `json:"id"`
-	Extracted    *time.Time     `json:"extract_time,omitempty"`
-	ExtractedSrc string         `json:"extract_src,omitempty"`
-	
+	ID           string     `json:"id"`
+	Extracted    *time.Time `json:"extract_time,omitempty"`
+	ExtractedSrc string     `json:"extract_src,omitempty"`
 }
 
-//BoxScore ...
-type BoxScore struct {
-	EntityID
+//Event ...
+type Event struct {
+	EntityID               //EntityID.ID in form of "YYYY-MM-DD.AWY.HOM" "2017-02-03.TOR.BOS" where date is EST...
 	GameID     GameID      `json:"gameId"`
 	League     League      `json:"league"`
 	Season     Season      `json:"season"`
@@ -153,8 +153,8 @@ type GameDetail struct {
 	StartTime           *time.Time  `json:"startTimeUTC,omitempty"`     //"startTimeUTC":"2019-10-01T00:00:00.000Z",
 	StartDateEastern    string      `json:"startDateEastern,omitempty"` //"startDateEastern":"20190930",
 	StartTimeEastern    string      `json:"startTimeEastern,omitempty"`
-	Period              *GamePeriod `json:"period,omitempty"` // "period": {}
-	Attendance          int         `json:"attendance,omitempty"`       //"attendance":"18624",
+	Period              *GamePeriod `json:"period,omitempty"`     // "period": {}
+	Attendance          int         `json:"attendance,omitempty"` //"attendance":"18624",
 	GameDurationMinutes int         `json:"gameDuration,omitempty"`
 }
 
@@ -169,12 +169,22 @@ type GamePeriod struct {
 
 //ScoreBoard ... holding structure for a set of BoxScores
 type ScoreBoard struct {
-	BoxScores []BoxScore
+	Events []Event `json:"events"`
 }
 
 // MasterIdentity will provide a basic "soure->target" mapping of different data sets against a
 // set of common table keys... things like events, players, and even locations need to be mastered
-func asMasterIdentity(v interface{}) string {
+func MasterIdentity(v interface{}) string {
 	// test if interface isA EntityID struct
-	return ""
+	fmt.Printf("Mastering With %#v", v)
+	switch v.(type) {
+	case *Event:
+		a, _ := v.(*Event)
+		key := (*a).GameDetail.StartDateEastern
+		key = key + ":" + (*a).VisitTeam.Abbreviation + ":" + (*a).HomeTeam.Abbreviation
+		(*a).EntityID.ID = key
+		return key
+	default:
+		return ""
+	}
 }

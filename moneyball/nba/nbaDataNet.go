@@ -207,8 +207,8 @@ type TimePeriod struct {
 	PeriodName   string  `json:"period_name,omitempty"`   //"period_name":"Qtr"},
 }
 
-//NBALinescore ...
-type NBALinescore struct {
+//Linescore ...
+type Linescore struct {
 	Period []PeriodicScore `json:"period"` //{	"period_value":"4","period_name":"Q4","score":"19"}]},
 }
 
@@ -220,14 +220,14 @@ type PeriodicScore struct {
 }
 
 //NBATeamStatLeader ... gamestats TODO: need to put this in namespace, and realign statistics
-type NBATeamStatLeader struct {
-	Points   NBATeamStatistic `json:"Points,omitempty"`
-	Assists  NBATeamStatistic `json:"Assists,omitempty"`
-	Rebounds NBATeamStatistic `json:"Rebounds,omitempty"`
+type TeamStatLeader struct {
+	Points   TeamStatistic `json:"Points,omitempty"`
+	Assists  TeamStatistic `json:"Assists,omitempty"`
+	Rebounds TeamStatistic `json:"Rebounds,omitempty"`
 }
 
 //NBATeamStatistic ... TODO: need to put this in namespace, and realign statistics
-type NBATeamStatistic struct {
+type TeamStatistic struct {
 	PlayerCount FlexInt  `json:"PlayerCount"` // "PlayerCount":"1", //TODO string to int (derived from sizeof array?)
 	StatValue   string   `json:"StatValue"`   // "StatValue":"32", // TODO string to int/float?
 	Players     []Person `json:"leader"`      //	"leader":[{"PersonID":"200768","PlayerCode":"kyle_lowry","FirstName":"Kyle","LastName":"Lowry"}],
@@ -262,18 +262,18 @@ type TeamStats struct {
 
 //WorkingTeam ... visitor/home team info with status...
 type WorkingTeam struct {
-	TeamID       string            `json:"id"`                     //"id":"1610612761", // convert string to int?
-	TeamKey      string            `json:"team_key"`               //"team_key":"TOR",
-	City         string            `json:"city"`                   //"city":"Toronto",
-	Abbreviation string            `json:"abbreviation,omitempty"` //"abbreviation":"TOR",
-	Nickname     string            `json:"nickname,omitempty"`     //"nickname":"Raptors",
-	URLName      string            `json:"url_name"`               //"url_name":"raptors",
-	TeamCode     string            `json:"team_code"`              //"team_code":"raptors",
-	Score        FlexInt           `json:"score"`                  //"score":"104", //TODO string to int
-	Linescores   NBALinescore      `json:"linescores"`
-	Leaders      NBATeamStatLeader `json:"Leaders"`
-	TeamStats    TeamStats         `json:"stats"`
-	Players      PlayerArray       `json:"players"` //TODO... properly parse this... don't need holding structure
+	TeamID       string         `json:"id"`                     //"id":"1610612761", // convert string to int?
+	TeamKey      string         `json:"team_key"`               //"team_key":"TOR",
+	City         string         `json:"city"`                   //"city":"Toronto",
+	Abbreviation string         `json:"abbreviation,omitempty"` //"abbreviation":"TOR",
+	Nickname     string         `json:"nickname,omitempty"`     //"nickname":"Raptors",
+	URLName      string         `json:"url_name"`               //"url_name":"raptors",
+	TeamCode     string         `json:"team_code"`              //"team_code":"raptors",
+	Score        FlexInt        `json:"score"`                  //"score":"104", //TODO string to int
+	Linescores   Linescore      `json:"linescores"`
+	Leaders      TeamStatLeader `json:"Leaders"`
+	TeamStats    TeamStats      `json:"stats"`
+	Players      PlayerArray    `json:"players"` //TODO... properly parse this... don't need holding structure
 }
 
 //PlayerArray ... TODO... don't need this extra structure associated with team

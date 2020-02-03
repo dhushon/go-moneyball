@@ -232,5 +232,5 @@ func (s *ScheduleService) NBAScheduleServicev2(ctx context.Context, modifier map
 	if err != nil {
 		fmt.Printf("Error caught: %s\n", err)
 	}
-	return &event.LeagueSchedule.Standard, resp, err
+	return &event.LeagueSchedule.Events, resp, err
 }
