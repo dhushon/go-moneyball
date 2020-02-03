@@ -68,7 +68,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"context"
 	"fmt"
-	"moneyball/go-moneyball/moneyball/espn"
+	"go-moneyball/moneyball/espn"
 	"net/url"
 	"os"
 )

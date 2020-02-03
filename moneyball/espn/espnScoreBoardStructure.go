@@ -65,7 +65,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"encoding/json"
 	"fmt"
-	"moneyball/go-moneyball/moneyball/ms"
+	"go-moneyball/moneyball/ms"
 	"strings"
 	"time"
 )

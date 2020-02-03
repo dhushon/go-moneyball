@@ -40,9 +40,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"fmt"
-	"moneyball/go-moneyball/moneyball/ms"
-	"time"
+	"go-moneyball/moneyball/ms"
 	"strconv"
+	"time"
 )
 
 const (
@@ -200,16 +200,16 @@ func (e *ScheduledGamev2) MarshalMSEvent() (*ms.Event, error) {
 	return &bs, nil
 }
 
-func (e *ScheduledGamev2) marshalMSGameDetail() (*ms.GameDetail) {
+func (e *ScheduledGamev2) marshalMSGameDetail() *ms.GameDetail {
 	/*
-	type GameDetail struct {
-	StartTime           *time.Time  `json:"startTimeUTC,omitempty"`     //"startTimeUTC":"2019-10-01T00:00:00.000Z",
-	StartDateEastern    string      `json:"startDateEastern,omitempty"` //"startDateEastern":"20190930",
-	StartTimeEastern    string      `json:"startTimeEastern,omitempty"`
-	Period              *GamePeriod `json:"period,omitempty"`     // "period": {}
-	Attendance          int         `json:"attendance,omitempty"` //"attendance":"18624",
-	GameDurationMinutes int         `json:"gameDuration,omitempty"`
-	}*/
+		type GameDetail struct {
+		StartTime           *time.Time  `json:"startTimeUTC,omitempty"`     //"startTimeUTC":"2019-10-01T00:00:00.000Z",
+		StartDateEastern    string      `json:"startDateEastern,omitempty"` //"startDateEastern":"20190930",
+		StartTimeEastern    string      `json:"startTimeEastern,omitempty"`
+		Period              *GamePeriod `json:"period,omitempty"`     // "period": {}
+		Attendance          int         `json:"attendance,omitempty"` //"attendance":"18624",
+		GameDurationMinutes int         `json:"gameDuration,omitempty"`
+		}*/
 	gd := ms.GameDetail{}
 	refTime := time.Time((*e).StartTime)
 	fmt.Printf("timeRef %s\n", refTime)
@@ -228,7 +228,7 @@ func (e *ScheduledGamev2) marshalMSGameDetail() (*ms.GameDetail) {
 	//gd.StartTimeEastern = (*e).StartTimeEastern  // ignore initial - wrong formatting
 	//TODO: Period
 	gd.Attendance, _ = strconv.Atoi((*e).Attendance)
-	gd.GameDurationMinutes = ((int((*e).GameDuration.Hours)*60)+int((*e).GameDuration.Minutes))
+	gd.GameDurationMinutes = ((int((*e).GameDuration.Hours) * 60) + int((*e).GameDuration.Minutes))
 	return &gd
 }
 

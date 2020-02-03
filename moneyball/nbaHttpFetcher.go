@@ -43,7 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"context"
 	"fmt"
-	"moneyball/go-moneyball/moneyball/nba"
+	"go-moneyball/moneyball/nba"
 	"net/url"
 	"os"
 	"strconv"
