@@ -67,4 +67,22 @@ type TeamSeasonRoster struct {
 
 //Player ...
 type Player struct {
+	EntityID    EntityID
+	IDESPN      string    `json:"idESPN,omitempty"` // e.g. "id":"3012",
+	IDNBA       string    `json:"idNBA,omitempty"`
+	FullName    string    `json:"fullName,omitempty"`    // e.g. "fullName":"Kyle Lowry",
+	DisplayName string    `json:"displayName,omitempty"` // e.g. "displayName":"Kyle Lowry",
+	ShortName   string    `json:"shortName,omitempty"`   // e.g."K. Lowry",
+	Links       []Link    `json:"links"`
+	Jersey      string    `json:"jersey,omitempty"` // e.g. "jersey":"7",
+	Headshot    *Link     `json:"headshot"`         // e.g. "headshot":"https://a.espncdn.com/i/headshots/nba/players/full/3012.png",
+	Position    *Position `json:"position,omitempty"`
+	Team        *Team     `json:"team" binding:"required"`
+	Active      bool      `json:"active"`
+}
+
+//Position ... somthing like C[enter], P[oint]G[uard]...
+type Position struct {
+	Name         string `json:"name"`
+	Abbreviation string `json:"abbreviation"`
 }
