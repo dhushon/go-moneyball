@@ -178,12 +178,14 @@ func MasterIdentity(v interface{}) string {
 	// test if interface isA EntityID struct
 	fmt.Printf("Mastering With %#v", v)
 	switch v.(type) {
-	case *Event:
+	case *Event: //"2020-01-02:WAS:DEN" where Visit:Home is arrangement
 		a, _ := v.(*Event)
 		key := (*a).GameDetail.StartDateEastern
 		key = key + ":" + (*a).VisitTeam.Abbreviation + ":" + (*a).HomeTeam.Abbreviation
 		(*a).EntityID.ID = key
 		return key
+	case *Competitor: //"Team @ Event so "WAS@Event.EntityID.ID
+		return ""
 	default:
 		return ""
 	}
