@@ -219,14 +219,14 @@ type PeriodicScore struct {
 	Score       FlexInt `json:"score"` //TODO string to int
 }
 
-//NBATeamStatLeader ... gamestats TODO: need to put this in namespace, and realign statistics
+//TeamStatLeader ... gamestats TODO: need to put this in namespace, and realign statistics
 type TeamStatLeader struct {
 	Points   TeamStatistic `json:"Points,omitempty"`
 	Assists  TeamStatistic `json:"Assists,omitempty"`
 	Rebounds TeamStatistic `json:"Rebounds,omitempty"`
 }
 
-//NBATeamStatistic ... TODO: need to put this in namespace, and realign statistics
+//TeamStatistic ... TODO: need to put this in namespace, and realign statistics
 type TeamStatistic struct {
 	PlayerCount FlexInt  `json:"PlayerCount"` // "PlayerCount":"1", //TODO string to int (derived from sizeof array?)
 	StatValue   string   `json:"StatValue"`   // "StatValue":"32", // TODO string to int/float?

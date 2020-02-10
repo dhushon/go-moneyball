@@ -31,6 +31,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 import (
+	"errors"
 	"fmt"
 	"time"
 )
@@ -52,6 +53,7 @@ type Competitor struct {
 	EntityID
 	Name           string   `json:"name,omitempty"`
 	Abbreviation   string   `json:"abbreviation"`
+	Team           *Team    `json:"team"`
 	Record         Record   `json:"record,omitempty"`
 	Score          int      `json:"score"`
 	LineScore      *[]Score `json:"linescore,omitempty"` //"linescore":[{"score":"30"},{"score":"32"},{"score":"23"},{"score":"19"}]},
@@ -172,6 +174,43 @@ type ScoreBoard struct {
 	Events []Event `json:"events"`
 }
 
+func (c *Competitor) keyEntity(v interface{}) error {
+	fmt.Printf("Mastering With %#v", v)
+	switch v.(type) {
+	case *Event: //"2020-01-02:WAS:DEN" where Visit:Home is arrangement
+		a, _ := v.(*Event)
+		if a == nil {
+			return errors.New("nul pointer in Event, keyInvalid")
+		}
+		key := (*c).Abbreviation + ":" + (*a).EntityID.ID
+		c.EntityID.ID = key
+		if c.Team == nil {
+			return errors.New("nul pointer in Team, keyInvalid")
+		}
+		err := c.Team.keyEntity(*a)
+		if err != nil {
+			//TODO: copy up GameRoster
+		}
+		return err
+	}
+	return errors.New("unknown event")
+}
+
+func (t *Team) keyEntity(v interface{}) error {
+	fmt.Printf("Mastering With %#v", v)
+	switch v.(type) {
+	case *Event: //"2020-01-02:WAS:DEN" where Visit:Home is arrangement
+		a, _ := v.(*Event)
+		if a == nil {
+			return errors.New("nul pointer in Event, keyInvalid")
+		}
+		key := t.Abbreviation + ":" + string((*a).Season.SeasonYear) + ":" + string((*a).Season.SeasonStage)
+		t.EntityID.ID = key // TeamID Abbrevioation + SeasonYear + SeasonStage = "WAS:2019:2"
+	}
+	return nil
+
+}
+
 // MasterIdentity will provide a basic "soure->target" mapping of different data sets against a
 // set of common table keys... things like events, players, and even locations need to be mastered
 func MasterIdentity(v interface{}) string {
@@ -180,12 +219,13 @@ func MasterIdentity(v interface{}) string {
 	switch v.(type) {
 	case *Event: //"2020-01-02:WAS:DEN" where Visit:Home is arrangement
 		a, _ := v.(*Event)
+
 		key := (*a).GameDetail.StartDateEastern
 		key = key + ":" + (*a).VisitTeam.Abbreviation + ":" + (*a).HomeTeam.Abbreviation
 		(*a).EntityID.ID = key
+		_ = (*a).HomeTeam.keyEntity(*a)
+		_ = (*a).VisitTeam.keyEntity(*a)
 		return key
-	case *Competitor: //"Team @ Event so "WAS@Event.EntityID.ID
-		return ""
 	default:
 		return ""
 	}

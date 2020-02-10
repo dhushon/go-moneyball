@@ -50,13 +50,20 @@ type Team struct {
 //TeamSeasonRecords ...
 type TeamSeasonRecords struct {
 	Season Season  `json:"season"`
-	Stat   []*Stat `json:"teamStat,omitempty"`
+	Stats   []*Stat `json:"teamStat,omitempty"`
 }
 
-//Stat .. a well known stat
+//GamePlayerStats ... may be used in boxScores to do game stats associated with Player
+type GamePlayerStats struct {
+   EntityID `json:"gamePlayerID"`
+   Stats []*Stat `json:"gamePlayerStat"`
+}
+
+//Stat .. a well known stat both short/long verions if exists
 type Stat struct {
-	Key   string      `json:"key"`
-	Value interface{} `json:"value"`
+   Key     string      `json:"key"`
+   LongKey string      `json:"longKey"`
+	Value   interface{} `json:"value"`
 }
 
 //TeamSeasonRoster ...
