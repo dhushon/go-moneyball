@@ -189,11 +189,10 @@ func (e *ScheduledGamev2) MarshalMSEvent() (*ms.Event, error) {
 	bs.EntityID = eID
 	bs.GameID = ms.GameID(e.GameID)
 	bs.League = ms.League("NBA")
-	bs.Season = ms.Season{int((*e).SeasonYear), (*e).SeasonStageID}
-	bs.HomeTeam, _ = (*e).HomeTeam.marshalMSTeam()
-	bs.VisitTeam, _ = (*e).VisitingTeam.marshalMSTeam()
-	//TODO: Venue
-
+	bs.Season = ms.Season{SeasonYear: int(((*e).SeasonYear)), SeasonStage: (*e).SeasonStageID}
+	bs.HomeTeam, _ = (*e).HomeTeam.marshalMSCompetitor()
+	bs.VisitTeam, _ = (*e).VisitingTeam.marshalMSCompetitor()
+	bs.Venue, _ = (*e).Arena.marshalMSVenue()
 	bs.GameDetail = e.marshalMSGameDetail()
 
 	ms.MasterIdentity(&bs)
@@ -232,17 +231,26 @@ func (e *ScheduledGamev2) marshalMSGameDetail() *ms.GameDetail {
 	return &gd
 }
 
-func (t GameTeamv2) marshalMSTeam() (*ms.Competitor, error) {
+func (t *GameTeamv2) marshalMSCompetitor() (*ms.Competitor, error) {
 	c := ms.Competitor{}
 	c.ID = t.TeamID
 	c.Abbreviation = t.TriCode
 	//c.Record = t.
 	linescores := []ms.Score{}
 	for _, lsc := range t.Linescore {
-		linescores = append(linescores, ms.Score{float32(lsc.Score)})
+		linescores = append(linescores, ms.Score{Score: float32(lsc.Score)})
 		fmt.Printf("linescore %v", linescores)
 	}
 	c.LineScore = &linescores
 	c.Score = int(t.Score)
 	return &c, nil
+}
+
+func (a *Arena) marshalMSVenue() (*ms.Venue, error) {
+	v := ms.Venue{}
+	v.FullName = a.Name
+	v.Address = &ms.Address{Street: "", City: a.City, State: a.State, Country: a.Country}
+	_,err := ms.GetGeoCodeAddress(&v)
+	//TODO: Setup EntityID..
+	return &v, err
 }

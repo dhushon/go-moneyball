@@ -34,17 +34,26 @@ import (
 	"bytes"
 	"log"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/assert"
 )
 
 const ()
+var timeN = time.Now()
+var team1 = Team{EntityID{"WAS",&timeN,"sampleData"},"1610612745","","WAS","Washington Wizards",nil,nil}
+var team2 = Team{EntityID{"DET",&timeN,"sampleData"},"","26","DET","Detroit Pistons",nil,nil}
+var team3 = Team{EntityID{"TOR",&timeN,"sampleData"},"","25","TOR","Toronto Raptors",nil,nil}
+var team4 = Team{EntityID{"BOS",&timeN,"sampleData"},"","17","BOS","Boston Celtics",nil,nil}
 
+//type Team struct {
+	//Records []*TeamSeasonRecords `json:"records"`
+	//Rosters []*TeamSeasonRoster  `json:"rosters"` // roster is copied to Competitor for a given game}
 var bss = ScoreBoard{
 	[]Event{
 		Event{EntityID{"2019-12-28.WSH.DET", nil, ""}, "2019-12-28.WSH.DET", "NBA", Season{2019, 1},
-			&Competitor{EntityID{"DET-NBA-2019", nil, ""}, "Detroit Pistons", "DET", nil, Record{0, 1, []Item{}}, 0, &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
-			&Competitor{EntityID{"WAS-NBA-2019", nil, ""}, "Washington Wizards", "WAS", nil, Record{1, 0, []Item{}}, 0, &[]Score{}, "Washington", "0E3764", "e31837", true, false, nil},
+			&Competitor{EntityID{"DET-NBA-2019", nil, ""}, "Detroit Pistons", "DET", &team2, Record{0, 1, []Item{}}, 0, &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
+			&Competitor{EntityID{"WAS-NBA-2019", nil, ""}, "Washington Wizards", "WAS", &team1, Record{1, 0, []Item{}}, 0, &[]Score{}, "Washington", "0E3764", "e31837", true, false, nil},
 			&Venue{EntityID{}, "", "Little Caesars Arena", &Address{}, 10000, true},
 			&GameStatus{0.0, 0, "Final", "Thu, December 28th at 7:00 PM EST"},
 			&[]Link{
@@ -54,8 +63,8 @@ var bss = ScoreBoard{
 			&GameDetail{},
 		},
 		Event{EntityID{"2017-02-03.TOR.BOS", nil, ""}, "2017-02-03.TOR.BOS", "NBA", Season{2017, 1},
-			&Competitor{EntityID{"TOR-NBA-2017", nil, ""}, "Toronto Raptors", "TOR", nil, Record{1, 0, []Item{}}, 109, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
-			&Competitor{EntityID{"BOS-NBA-2017", nil, ""}, "Boston Celtics", "BOS", nil, Record{0, 1, []Item{}}, 104, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
+			&Competitor{EntityID{"TOR-NBA-2017", nil, ""}, "Toronto Raptors", "TOR", &team3, Record{1, 0, []Item{}}, 109, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
+			&Competitor{EntityID{"BOS-NBA-2017", nil, ""}, "Boston Celtics", "BOS", &team4, Record{0, 1, []Item{}}, 104, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
 			&Venue{EntityID{}, "", "TD Garden", &Address{}, 10000, true},
 			&GameStatus{0.0, 0, "Final", "Thu, February 3rd at 7:00 PM EST"},
 			&[]Link{},
@@ -74,4 +83,8 @@ func marshalNBJSONTest(t *testing.T) {
 
 	//marshall with json newline
 	log.Println("exiting")
+}
+
+func entityIDExtractTest(t *testing.T){
+	
 }

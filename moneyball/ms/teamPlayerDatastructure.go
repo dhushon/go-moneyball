@@ -38,8 +38,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //Team ...
 type Team struct {
 	EntityID
-	NBATeamID    string `json:"teamIdNBA,omitempty"` //"teamId":"1610612745"
-	ESPNTeamID   string `json:"teamIdESPN,omitempty"`
+	TeamIDNBA    string `json:"teamIdNBA,omitempty"` //"teamId":"1610612745"
+	TeamIDESPN   string `json:"teamIdESPN,omitempty"`
 	Abbreviation string `json:"abbreviation"`
 	Name         string `json:"bame"`
 	//TODO: how to treat historic record?
@@ -50,19 +50,19 @@ type Team struct {
 //TeamSeasonRecords ...
 type TeamSeasonRecords struct {
 	Season Season  `json:"season"`
-	Stats   []*Stat `json:"teamStat,omitempty"`
+	Stats  []*Stat `json:"teamStat,omitempty"`
 }
 
 //GamePlayerStats ... may be used in boxScores to do game stats associated with Player
 type GamePlayerStats struct {
-   EntityID `json:"gamePlayerID"`
-   Stats []*Stat `json:"gamePlayerStat"`
+	EntityID `json:"gamePlayerID"`
+	Stats    []*Stat `json:"gamePlayerStat"`
 }
 
 //Stat .. a well known stat both short/long verions if exists
 type Stat struct {
-   Key     string      `json:"key"`
-   LongKey string      `json:"longKey"`
+	Key     string      `json:"key"`
+	LongKey string      `json:"longKey"`
 	Value   interface{} `json:"value"`
 }
 
