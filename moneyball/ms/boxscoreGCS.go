@@ -34,7 +34,6 @@ import (
 	"bytes"
 	"cloud.google.com/go/storage"
 	"context"
-	"fmt"
 	"google.golang.org/api/googleapi"
 	"google.golang.org/api/option"
 	"io"
@@ -96,7 +95,7 @@ func Write(b *bytes.Buffer, projectID *string, bucketName string, objectName str
 
 	//push new attr triples at some point in future
 	wc.ACL = []storage.ACLRule{{Entity: storage.AllUsers, Role: storage.RoleReader}}
-	fmt.Println("updated object:", wc.Attrs())
+	log.Println("updated object:", wc.Attrs())
 
 	if err := wc.Close(); err != nil {
 		log.Printf("Error: %v\n", err)

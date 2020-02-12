@@ -43,6 +43,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 import (
 	"context"
 	"fmt"
+	"log"
 	"go-moneyball/moneyball/nba"
 	"net/url"
 	"os"
@@ -110,7 +111,7 @@ func (s *ScheduleService) NBAScheduleService(ctx context.Context, modifier map[s
 	event := &nba.SportsEvent{}
 	resp, err := s.client.Do(ctx, req, event, true)
 	if err != nil {
-		fmt.Printf("Error caught: %s\n", err)
+		log.Printf("Error caught: %s\n", err)
 	}
 	return nil, resp, err
 	//return &event.Event.Schedule.Games, resp, err
@@ -136,7 +137,7 @@ func (s *ScoreService) BoxScoreService(ctx context.Context) (*nba.SportsEvent, *
 	event := &nba.SportsEvent{}
 	resp, err := s.client.Do(ctx, req, event, true)
 	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
+		log.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
 	}
 	//TODO... extract meta and bring backscore of game
@@ -160,7 +161,7 @@ func (s *StatsService) NBAPlayerMovementStatsService(ctx context.Context) (*nba.
 	tln := &nba.StatsTLN{}
 	resp, err := s.client.Do(ctx, req, tln, true)
 	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
+		log.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
 	}
 	return tln, resp, err
@@ -205,7 +206,7 @@ func (s *ScoreService) NBABoxScoreServicev2(ctx context.Context, modifier map[st
 	event := &nba.CMSProdv1BoxScore{}
 	resp, err := s.client.Do(ctx, req, event, true)
 	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
+		log.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
 	}
 	return &event.Game, resp, err
@@ -230,7 +231,7 @@ func (s *ScheduleService) NBAScheduleServicev2(ctx context.Context, modifier map
 	event := &nba.CMSProdv2Schedule{}
 	resp, err := s.client.Do(ctx, req, event, true)
 	if err != nil {
-		fmt.Printf("Error caught: %s\n", err)
+		log.Printf("Error caught: %s\n", err)
 	}
 	return &event.LeagueSchedule.Events, resp, err
 }

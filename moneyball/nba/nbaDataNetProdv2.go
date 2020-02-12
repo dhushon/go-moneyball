@@ -39,8 +39,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 //REF: http://nbasense.com/nba-api/Data/Cms/Game/Boxscore
 
 import (
-	"fmt"
 	"go-moneyball/moneyball/ms"
+	"log"
 	"strconv"
 	"time"
 )
@@ -211,15 +211,15 @@ func (e *ScheduledGamev2) marshalMSGameDetail() *ms.GameDetail {
 		}*/
 	gd := ms.GameDetail{}
 	refTime := time.Time((*e).StartTime)
-	fmt.Printf("timeRef %s\n", refTime)
+	//fmt.Printf("timeRef %s\n", refTime)
 	gd.StartTime = &refTime
 	location, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		// set error
-		fmt.Printf("error: timezone conversion %#v\n", err)
+		log.Printf("error: timezone conversion %#v\n", err)
 	}
 	est := refTime.In(location)
-	fmt.Printf("time: UTC %s, EST %s\n", refTime, est)
+	//fmt.Printf("time: UTC %s, EST %s\n", refTime, est)
 
 	gd.StartDateEastern = est.Format("2006-01-02")
 	gd.StartTimeEastern = est.Format("15:04:05")
@@ -239,7 +239,7 @@ func (t *GameTeamv2) marshalMSCompetitor() (*ms.Competitor, error) {
 	linescores := []ms.Score{}
 	for _, lsc := range t.Linescore {
 		linescores = append(linescores, ms.Score{Score: float32(lsc.Score)})
-		fmt.Printf("linescore %v", linescores)
+		//fmt.Printf("linescore %v", linescores)
 	}
 	c.LineScore = &linescores
 	c.Score = int(t.Score)
@@ -250,7 +250,7 @@ func (a *Arena) marshalMSVenue() (*ms.Venue, error) {
 	v := ms.Venue{}
 	v.FullName = a.Name
 	v.Address = &ms.Address{Street: "", City: a.City, State: a.State, Country: a.Country}
-	_,err := ms.GetGeoCodeAddress(&v)
+	_, err := ms.GetGeoCodeAddress(&v)
 	//TODO: Setup EntityID..
 	return &v, err
 }

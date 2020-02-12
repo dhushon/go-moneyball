@@ -67,7 +67,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"context"
-	"fmt"
+	"log"
 	"go-moneyball/moneyball/espn"
 	"net/url"
 	"os"
@@ -91,7 +91,7 @@ func (s *ScoreService) ESPNBoxScoreService(ctx context.Context) (*(espn.ScoreBoa
 	sb := &espn.ScoreBoard{}
 	resp, err := s.client.Do(ctx, req, sb, false)
 	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
+		log.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
 	}
 	return sb, resp, err
@@ -115,7 +115,7 @@ func (s *StatsService) ESPNTeamsService(ctx context.Context) (*espn.TeamSport, *
 	teams := &espn.TeamSport{}
 	resp, err := s.client.Do(ctx, req, teams, false)
 	if err != nil {
-		fmt.Printf("Error on new request: %s\n", err)
+		log.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
 	}
 	return teams, resp, err

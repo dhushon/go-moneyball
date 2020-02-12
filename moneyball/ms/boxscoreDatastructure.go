@@ -32,7 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"errors"
-	"fmt"
+	"log"
 	"time"
 )
 
@@ -175,7 +175,7 @@ type ScoreBoard struct {
 }
 
 func (c *Competitor) keyEntity(v interface{}) error {
-	fmt.Printf("Mastering With %#v", v)
+	log.Printf("Mastering With %#v", v)
 	switch v.(type) {
 	case *Event: //"2020-01-02:WAS:DEN" where Visit:Home is arrangement
 		a, _ := v.(*Event)
@@ -197,7 +197,7 @@ func (c *Competitor) keyEntity(v interface{}) error {
 }
 
 func (t *Team) keyEntity(v interface{}) error {
-	fmt.Printf("Mastering With %#v", v)
+	log.Printf("Mastering With %#v", v)
 	switch v.(type) {
 	case *Event: //"2020-01-02:WAS:DEN" where Visit:Home is arrangement
 		a, _ := v.(*Event)
@@ -215,7 +215,7 @@ func (t *Team) keyEntity(v interface{}) error {
 // set of common table keys... things like events, players, and even locations need to be mastered
 func MasterIdentity(v interface{}) string {
 	// test if interface isA EntityID struct
-	fmt.Printf("Mastering With %#v", v)
+	log.Printf("Mastering With %#v", v)
 	switch v.(type) {
 	case *Event: //"2020-01-02:WAS:DEN" where Visit:Home is arrangement
 		a, _ := v.(*Event)

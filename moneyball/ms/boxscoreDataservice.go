@@ -133,7 +133,7 @@ func existsDataset(projectID string, testDataSetID string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		fmt.Printf("iterator: %s, found\n", dataset.DatasetID)
+		log.Printf("iterator: %s, found\n", dataset.DatasetID)
 		if dataset.DatasetID == testDataSetID {
 			return true, nil
 		}
@@ -180,7 +180,7 @@ func writeFile(filename string, b *bytes.Buffer) {
 	defer f.Close()
 
 	l, _ := b.WriteTo(f)
-	fmt.Printf("%s bytes written %d\n", filename, l)
+	log.Printf("%s bytes written %d\n", filename, l)
 }
 
 //InsertRow 1 row into named project and dataset.  note that BigQuery supports
@@ -309,7 +309,7 @@ func main() {
 		if err != nil {
 			if gerr, ok := err.(*googleapi.Error); ok {
 				if gerr.Code == 409 { // already exists
-					fmt.Printf("Dataset: %s Already Exists A.OK\n", dataSetName)
+					log.Printf("Dataset: %s Already Exists A.OK\n", dataSetName)
 				} else {
 					log.Panicf("error on CreateDataset: %s\n", gerr.Error())
 				}
@@ -320,10 +320,10 @@ func main() {
 	}
 
 	if err = InsertRow(*project, dataSetName, &bsc); err != nil {
-		fmt.Printf("error on InsertRow: %s\n", err.Error())
+		log.Printf("error on InsertRow: %s\n", err.Error())
 		//log.Panicf("error on InsertRow: %s\n", err.Error())
 		//if 404 error could do a create table and then retry?
 	}
 
-	fmt.Println("exiting")
+	log.Println("exiting")
 }

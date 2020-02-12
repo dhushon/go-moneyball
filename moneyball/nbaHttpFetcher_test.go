@@ -105,7 +105,6 @@ func TestNBABoxScoreServicev2(t *testing.T) {
 				(*schedule)[i] = *temp
 				fmt.Printf("new game %#v", (*schedule)[i])
 				// could build independent array of games or add detail or...
-
 			}
 			fmt.Printf("next\n")
 		}

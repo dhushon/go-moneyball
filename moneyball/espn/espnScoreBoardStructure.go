@@ -66,6 +66,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"go-moneyball/moneyball/ms"
+	"log"
 	"strings"
 	"time"
 )
@@ -464,7 +465,7 @@ func (e *Event) MarshalMSEvent(l League) (*ms.Event, error) {
 
 	if len(e.Competitions) > 1 {
 		// set error
-		fmt.Printf("error: compeitions should be 1 %d", len(e.Competitions))
+		return nil, fmt.Errorf("error: compeitions should be 1, found %d", len(e.Competitions))
 	}
 
 	for _, ref := range e.Competitions[0].Competitors {
@@ -475,7 +476,7 @@ func (e *Event) MarshalMSEvent(l League) (*ms.Event, error) {
 			bs.VisitTeam, _ = ref.marshalMSCompetitor()
 		default:
 			//throw error...
-			fmt.Printf("error: compeition should be home or away... found %s", ref.HomeAway)
+			return nil, fmt.Errorf("error: compeition should be home or away... found %s", ref.HomeAway)
 		}
 	}
 
@@ -503,15 +504,15 @@ func (e *Event) MarshalMSEvent(l League) (*ms.Event, error) {
 		} */
 	gd := ms.GameDetail{}
 	refTime := time.Time(e.Date)
-	fmt.Printf("timeRef %s\n", refTime)
+	log.Printf("timeRef %s\n", refTime)
 	gd.StartTime = &refTime
 	location, err := time.LoadLocation("America/New_York")
 	if err != nil {
 		// set error
-		fmt.Printf("error: timezone conversion %#v\n", err)
+		log.Printf("error: timezone conversion %#v\n", err)
 	}
 	est := refTime.In(location)
-	fmt.Printf("time: UTC %s, EST %s\n", refTime, est)
+	log.Printf("time: UTC %s, EST %s\n", refTime, est)
 
 	gd.StartDateEastern = est.Format("2006-01-02")
 	gd.StartTimeEastern = est.Format("15:04:05")

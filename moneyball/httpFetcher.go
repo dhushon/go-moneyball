@@ -40,6 +40,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"log"
 	"io"
 	"net/http"
 	"net/url"
@@ -241,7 +242,7 @@ func (c *Client) Do(ctx context.Context, req *http.Request, v interface{}, weakT
 	if (resp.StatusCode > 202) || resp.StatusCode < 200 {
 		//we have an error being returned..Address
 		err = errors.New("HTTP Status Code: " + resp.Status)
-		fmt.Printf("Received %s, Message: %s", err, resp.Body)
+		log.Printf("Received %s, Message: %s", err, resp.Body)
 		return nil, err
 	}
 	response := newResponse(resp)
