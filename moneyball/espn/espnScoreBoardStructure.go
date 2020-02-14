@@ -192,7 +192,7 @@ type Competition struct {
 	Recent                bool            `json:"recent"`
 	Venue                 Venue           `json:"venue"`
 	Competitors           []Competitor    `json:"competitors"`
-	Notes                 []string        `json:"notes"`
+	//Notes                 []string        `json:"notes"` skip notes, not an array of strings throws marshalling error
 	GameStatus            GameStatus      `json:"status"`
 	Broadcasts            []Broadcast     `json:"broadcasts"`
 	//Tickets
@@ -461,7 +461,7 @@ func (e *Event) MarshalMSEvent(l League) (*ms.Event, error) {
 	bs.EntityID = eID
 	bs.GameID = ms.GameID(e.ID)
 	bs.League = ms.League(l.Abbreviation)
-	bs.Season = ms.Season{e.Season.Year, e.Season.Type}
+	bs.Season = ms.Season{SeasonYear: e.Season.Year, SeasonStage: e.Season.Type}
 
 	if len(e.Competitions) > 1 {
 		// set error
@@ -481,7 +481,10 @@ func (e *Event) MarshalMSEvent(l League) (*ms.Event, error) {
 	}
 
 	venue := e.Competitions[0].Venue
-	bs.Venue = &ms.Venue{ms.EntityID{"", nil, ""}, venue.ID, venue.FullName, marshalMSAddress(venue.Address), venue.Capacity, venue.IsIndoor}
+	bs.Venue = &ms.Venue{EntityID: ms.EntityID{ID: "", Extracted: nil, ExtractedSrc: ""},
+		LocalID: venue.ID, FullName: venue.FullName,
+		Address:  marshalMSAddress(venue.Address),
+		Capacity: venue.Capacity, IsIndoor: venue.IsIndoor}
 	bs.Status, _ = marshalMSGameStatus(e.Status)
 
 	links := []ms.Link{}
@@ -616,7 +619,7 @@ func (comp *Competitor) marshalMSCompetitor() (*ms.Competitor, error) {
 }
 
 func marshalMSGameStatus(gs GameStatus) (*ms.GameStatus, error) {
-	return &ms.GameStatus{gs.Clock, gs.Period, gs.StatusType.State, gs.StatusType.Detail}, nil
+	return &ms.GameStatus{Clock: gs.Clock, Period: gs.Period, State: gs.StatusType.State, Detail: gs.StatusType.Detail}, nil
 }
 
 func marshalMSLink(l Link) (*ms.Link, error) {
@@ -632,4 +635,49 @@ func marshalMSLink(l Link) (*ms.Link, error) {
 	link.Alt = l.Text
 	link.Dimension = &ms.LinkDimensions{l.Width, l.Height}
 	return &link, nil
+}
+
+func marshalMSTeam(t Team) (*ms.Team, error) {
+	/*ID               string        `json:"id" binding:"required"`
+	UID              string        `json:"uid" binding:"required"`
+	Slug             string        `json:"slug,omitempty"`
+	Location         string        `json:"location,omitempty"`         //"Toronto",
+	Name             string        `json:"name,omitempty"`             // "Raptors"
+	Abbreviation     string        `json:"abbreviation,omitempty"`     // "TOR"
+	DisplayName      string        `json:"displayName,omitempty"`      // "Toronto Raptors"
+	ShortDisplayName string        `json:"shortDisplayName,omitempty"` // Raptors
+	Color            string        `json:"color,omitempty"`            //"CEOF41"
+	AlternateColor   string        `json:"alternateColor,omitempty"`   //"061922"
+	IsActive         bool          `json:"isActive"`
+	IsAllStar        bool          `json:"isAllStar"`
+	Venue            Venue         `json:"venue"`
+	Links            []Link        `json:"links,omitempty"`
+	Logos            []Link        `json:"logos,omitempty"`
+	Logo             string        `json:"logo,omitempty"`
+	Score            string        `json:"score,omitempty"`
+	Linescores       []Linescore   `json:"linescores,omitempty"`
+	Record           []RecordItems `json:"record,omitempty"`
+	*/
+	team := ms.Team{}
+	//TODO: probably want to fetch the right team and start with latest fetch?
+
+	team.TeamIDESPN = t.UID
+	team.Abbreviation = t.Abbreviation
+	team.Name = t.Name
+	//TODO: Links...
+	team.Records = []*ms.TeamSeasonRecords{}
+	for _, rec := range t.Record { // set of records.. "per season"
+		tsr := ms.TeamSeasonRecords{Season: nil, Summary: "", Stats: nil}
+		for _, item := range rec.Items { // Item has a Summary and a range of Items... Summary is description
+			tsr.Summary = item.Summary
+			tStats := []*ms.Stat{}
+			for _, stat := range item.Stats { // each TeamRecord
+				tStats = append(tStats, &ms.Stat{Key: stat.Name, LongKey: stat.Name, Value: stat.Value})
+			}
+			tsr.Stats = tStats
+		}
+		team.Records = append(team.Records, &tsr)
+	}
+	team.Rosters = []*ms.TeamSeasonRoster{}
+	return &team, nil
 }
