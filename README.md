@@ -12,6 +12,16 @@ espn/                    moneyball*               nbaHttpFetcher.go
 espnHttpFetcher.go       moneyball.go             nbaHttpFetcher_test.go
 ./moneyball
 ```
+so there it is... now let's run some tests, and please do not forget to get your keys loaded into the environment
+```
+source ../env.bash
+```
+also let's load the libraries and then run the tests
+```
+go test -i
+go test
+```
+
 please note that the moneyball binary, in itself may not be interesting, but the ability to sample data from espn, nba, ... normalize using the ./ms structures for primary entities: Events [Games] played by Competitors [Teams] given a Roster of Players that win and produce Stats... all helps build the warehouse
 
 standard moneyball parameters: NBAProdv2 ?Season&2019?SeasonStage&1 [regular season]
