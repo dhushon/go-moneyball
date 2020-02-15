@@ -67,7 +67,7 @@ func main() {
 	if err != nil {
 		fmt.Printf("ScheduleService: Error %s\n", err)
 	}
-	fmt.Printf("NBAScheduleService: %d with values %#v retrieved\n", len(*schedule), (*schedule)[0])
+	fmt.Printf("NBAScheduleService: for params:%#v, returned %d games\n  %#v retrieved\n", schedParams, len(*schedule), (*schedule)[0])
 	//getTodayGames(schedule)
 	todayStart := time.Now()
 	tomorrow := todayStart.AddDate(0, 0, 1)
@@ -87,9 +87,9 @@ func main() {
 				fmt.Printf("BoxScoreService: Error %s\n", err)
 			} else {
 				// replace existing game with the detailed box.
-				fmt.Printf("orig_game %s", game.GameURLCode)
+				fmt.Printf("-orig_game %s\n", game.GameURLCode)
 				(*schedule)[i] = *temp
-				fmt.Printf("new game %#v", (*schedule)[i])
+				fmt.Printf("+new game %#v\n", (*schedule)[i])
 				// could build independent array of games or add detail or...
 
 			}
@@ -118,7 +118,7 @@ func main() {
 		fmt.Printf("ScoreBoardService: Error: %s\n", err)
 	}
 	sb, _ := scoreboard.MarshalMS()
-	spew.Printf("espn.ScoreBoard: %v\n\n", scoreboard)
+	//spew.Printf("espn.ScoreBoard: %v\n\n", scoreboard)
 	spew.Printf("ms.ScoreBoard: %v\n\n", sb)
 
 	teams, _, err := client.Stats.ESPNTeamsService(ctx)

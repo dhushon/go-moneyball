@@ -36,13 +36,14 @@ import (
 	"io/ioutil"
 	"log"
 	"testing"
+	"go-moneyball/moneyball/ms"
 
 	"github.com/stretchr/testify/assert"
 )
 
-const tFilename = "../examples/json/espnTeams123019-0931.json"
+const tFilename = "../../examples/json/espnTeams123019-0931.json"
 
-func TestmarshalMSTeam(t *testing.T) {
+func TestMarshalMSTeam(t *testing.T) {
 	b, err := ioutil.ReadFile(tFilename)
 	if err != nil {
 		log.Printf("ERROR thrown: %s\n", err)
@@ -50,6 +51,14 @@ func TestmarshalMSTeam(t *testing.T) {
 	assert.Nil(t, err, fmt.Errorf("couldn't read file: %s", tFilename))
 	ts := TeamSport{}
 	err = json.Unmarshal(b, &ts)
+	fmt.Printf("bytes: %s",b)
 	assert.Nil(t, err, fmt.Errorf("error decoding json file: %s, %#v", tFilename, err))
+	mTeam := []*ms.Team{}
+	for _, team := range ts.Sport[0].Leagues[0].Teams {
+		tm, err := marshalMSTeam(&team.Team)
+		assert.Nil(t, err, fmt.Errorf("error %#v: translating %#v, to %#v", err, team, tm))
+		mTeam = append(mTeam, tm)
+	}
+	//should have a certain number of teams
 	log.Printf("espnTeam->MSTeam worked\n")
 }

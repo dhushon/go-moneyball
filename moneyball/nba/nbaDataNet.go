@@ -42,6 +42,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"encoding/json"
+	"log"
 	"strconv"
 )
 
@@ -300,6 +301,7 @@ func (fi *FlexInt) UnmarshalJSON(b []byte) error {
 	} else {
 		i, err := strconv.Atoi(s)
 		if err != nil {
+			log.Printf("Error strconv.Atoi FlexInt convert, %s", s)
 			return err
 		}
 		*fi = FlexInt(i)

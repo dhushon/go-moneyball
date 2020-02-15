@@ -43,5 +43,4 @@ func GetGeoCodeTest(t *testing.T) {
 	assert.Nil(t, err, "error geocoding address!")
 	assert.Len(t, resp, 1, "Expect the response to be a singleton")
 	//TODO: test the geocode
-
 }

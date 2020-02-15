@@ -226,7 +226,15 @@ func (e *ScheduledGamev2) marshalMSGameDetail() *ms.GameDetail {
 	//gd.StartDateEastern = (*e).StartDateEastern  // ignore initial - wrong formatting
 	//gd.StartTimeEastern = (*e).StartTimeEastern  // ignore initial - wrong formatting
 	//TODO: Period
-	gd.Attendance, _ = strconv.Atoi((*e).Attendance)
+	if ((*e).Attendance == "") {
+		gd.Attendance = 0 
+	} else {
+		gd.Attendance, err = strconv.Atoi((*e).Attendance)
+		if (err != nil ) {
+			log.Printf("Error strconv.Atoi e.Attendance, %s set to zero", (*e).Attendance)
+		}
+		gd.Attendance = 0
+	}	
 	gd.GameDurationMinutes = ((int((*e).GameDuration.Hours) * 60) + int((*e).GameDuration.Minutes))
 	return &gd
 }
@@ -239,7 +247,6 @@ func (t *GameTeamv2) marshalMSCompetitor() (*ms.Competitor, error) {
 	linescores := []ms.Score{}
 	for _, lsc := range t.Linescore {
 		linescores = append(linescores, ms.Score{Score: float32(lsc.Score)})
-		//fmt.Printf("linescore %v", linescores)
 	}
 	c.LineScore = &linescores
 	c.Score = int(t.Score)

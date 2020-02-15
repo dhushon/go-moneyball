@@ -104,18 +104,18 @@ type SeasonDef struct {
 
 // League ... definition of league JSON from ESPN.com
 type League struct {
-	ID                  string     `json:"id" binding:"required"`
-	UID                 string     `json:"uid" binding:"required"`
+	ID                  string     `json:"id"`
+	UID                 string     `json:"uid"`
 	Name                string     `json:"name,omitempty"`
 	Abbreviation        string     `json:"abbreviation,omitempty"`
 	Slug                string     `json:"slug,omitempty"`
-	Season              SeasonDef  `json:"season,omitempty"`
+	Season              *SeasonDef `json:"season,omitempty"`
 	CalendarType        string     `json:"calendarType,omitempty"`
 	CalendarIsWhiteList bool       `json:"calendarIsWhitelist,omitempty"`
 	CalendarStartDate   espnTime   `json:"calendarStartDate,omitempty"`
 	CalendarEndDate     espnTime   `json:"calendarEndDate,omitempty"`
 	Calendar            []espnTime `json:"calendar,omitempty"`
-	Teams               []Team     `json:"teams,omitempty"`
+	Teams               []ATeam    `json:"teams"`
 }
 
 //SeasonShort ...
@@ -193,8 +193,8 @@ type Competition struct {
 	Venue                 Venue           `json:"venue"`
 	Competitors           []Competitor    `json:"competitors"`
 	//Notes                 []string        `json:"notes"` skip notes, not an array of strings throws marshalling error
-	GameStatus            GameStatus      `json:"status"`
-	Broadcasts            []Broadcast     `json:"broadcasts"`
+	GameStatus GameStatus  `json:"status"`
+	Broadcasts []Broadcast `json:"broadcasts"`
 	//Tickets
 	StartDate     espnTime       `json:"startDate"`
 	GeoBroadcasts []GeoBroadcast `json:"geoBroadcasts"`
@@ -292,6 +292,11 @@ type Record struct {
 	Abbreviation string `json:"abbreviation,omitempty"`
 	Type         string `json:"type"`
 	Summary      string `json:"summary"`
+}
+
+// ATeam ... a holding structure for decoding the Team structure in the espn model
+type ATeam struct {
+	Team Team `json:"team"`
 }
 
 //Team ...
@@ -489,7 +494,7 @@ func (e *Event) MarshalMSEvent(l League) (*ms.Event, error) {
 
 	links := []ms.Link{}
 	for _, link := range e.Links {
-		l, _ := marshalMSLink(link)
+		l, _ := marshalMSLink(&link)
 		links = append(links, *l)
 	}
 	bs.Links = &links
@@ -564,7 +569,7 @@ func (comp *Competitor) marshalMSCompetitor() (*ms.Competitor, error) {
 	//c.Record = t.
 	linescores := []ms.Score{}
 	for _, lsc := range t.Linescores {
-		linescores = append(linescores, ms.Score{lsc.Value})
+		linescores = append(linescores, ms.Score{Score: lsc.Value})
 	}
 	c.LineScore = &linescores
 	c.Location = (*comp).Team.Location
@@ -574,7 +579,7 @@ func (comp *Competitor) marshalMSCompetitor() (*ms.Competitor, error) {
 	c.IsAllStar = (*comp).Team.IsAllStar
 	links := []ms.Link{}
 	for _, link := range (*comp).Team.Links {
-		l, _ := marshalMSLink(link)
+		l, _ := marshalMSLink(&link)
 		links = append(links, *l)
 	}
 	c.Links = &links
@@ -622,7 +627,7 @@ func marshalMSGameStatus(gs GameStatus) (*ms.GameStatus, error) {
 	return &ms.GameStatus{Clock: gs.Clock, Period: gs.Period, State: gs.StatusType.State, Detail: gs.StatusType.Detail}, nil
 }
 
-func marshalMSLink(l Link) (*ms.Link, error) {
+func marshalMSLink(l *Link) (*ms.Link, error) {
 	link := ms.Link{}
 	if l.Logo != "" {
 		//we have a logo reference... so we need dimensions
@@ -633,38 +638,33 @@ func marshalMSLink(l Link) (*ms.Link, error) {
 	}
 	link.Rel = l.Rel
 	link.Alt = l.Text
-	link.Dimension = &ms.LinkDimensions{l.Width, l.Height}
+	link.Dimension = &ms.LinkDimensions{Width: l.Width, Height: l.Height}
 	return &link, nil
 }
 
-func marshalMSTeam(t Team) (*ms.Team, error) {
-	/*ID               string        `json:"id" binding:"required"`
-	UID              string        `json:"uid" binding:"required"`
-	Slug             string        `json:"slug,omitempty"`
-	Location         string        `json:"location,omitempty"`         //"Toronto",
-	Name             string        `json:"name,omitempty"`             // "Raptors"
-	Abbreviation     string        `json:"abbreviation,omitempty"`     // "TOR"
-	DisplayName      string        `json:"displayName,omitempty"`      // "Toronto Raptors"
-	ShortDisplayName string        `json:"shortDisplayName,omitempty"` // Raptors
-	Color            string        `json:"color,omitempty"`            //"CEOF41"
-	AlternateColor   string        `json:"alternateColor,omitempty"`   //"061922"
-	IsActive         bool          `json:"isActive"`
-	IsAllStar        bool          `json:"isAllStar"`
-	Venue            Venue         `json:"venue"`
-	Links            []Link        `json:"links,omitempty"`
-	Logos            []Link        `json:"logos,omitempty"`
-	Logo             string        `json:"logo,omitempty"`
-	Score            string        `json:"score,omitempty"`
-	Linescores       []Linescore   `json:"linescores,omitempty"`
-	Record           []RecordItems `json:"record,omitempty"`
-	*/
+func marshalMSTeam(t *Team) (*ms.Team, error) {
 	team := ms.Team{}
 	//TODO: probably want to fetch the right team and start with latest fetch?
-
 	team.TeamIDESPN = t.UID
 	team.Abbreviation = t.Abbreviation
 	team.Name = t.Name
-	//TODO: Links...
+	team.Location = t.Location
+
+	//marshall Logos
+	team.Logos = []*ms.Link{}
+	for _, link := range t.Logos {
+		logo, _ := marshalMSLink(&link)
+		logo.IsLogo = true
+		team.Logos = append(team.Logos, logo)
+	}
+
+	//Marshall Links
+	team.Links = []*ms.Link{}
+	for _, link := range t.Links {
+		lnk, _ := marshalMSLink(&link)
+		team.Links = append(team.Links, lnk)
+	}
+	//TODO: Test TeamSeasonRecords field...
 	team.Records = []*ms.TeamSeasonRecords{}
 	for _, rec := range t.Record { // set of records.. "per season"
 		tsr := ms.TeamSeasonRecords{Season: nil, Summary: "", Stats: nil}

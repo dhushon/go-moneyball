@@ -41,10 +41,10 @@ import (
 
 const ()
 var timeN = time.Now()
-var team1 = Team{EntityID{"WAS",&timeN,"sampleData"},"1610612745","","WAS","Washington Wizards",nil,nil}
-var team2 = Team{EntityID{"DET",&timeN,"sampleData"},"","26","DET","Detroit Pistons",nil,nil}
-var team3 = Team{EntityID{"TOR",&timeN,"sampleData"},"","25","TOR","Toronto Raptors",nil,nil}
-var team4 = Team{EntityID{"BOS",&timeN,"sampleData"},"","17","BOS","Boston Celtics",nil,nil}
+var team1 = Team{EntityID{"WAS",&timeN,"sampleData"},"1610612745","","WAS","Washington Wizards","Washintgon",nil,nil,nil,nil}
+var team2 = Team{EntityID{"DET",&timeN,"sampleData"},"","26","DET","Detroit Pistons","Detroit",nil,nil,nil,nil}
+var team3 = Team{EntityID{"TOR",&timeN,"sampleData"},"","25","TOR","Toronto Raptors","Toronto",nil,nil,nil,nil}
+var team4 = Team{EntityID{"BOS",&timeN,"sampleData"},"","17","BOS","Boston Celtics","Boston",nil,nil,nil,nil}
 
 //type Team struct {
 	//Records []*TeamSeasonRecords `json:"records"`

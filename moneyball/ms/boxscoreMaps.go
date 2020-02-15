@@ -57,16 +57,19 @@ func (v *Venue) toString() string {
 func GetGeoCodeAddress(v *Venue) (string, error) {
 	c, err := maps.NewClient(getMapCreds())
 	if err != nil {
-		log.Fatalf("fatal error: %s", err)
+		log.Fatalf("fatal error ensure that Google Mapping API credential were provided: %s", err)
+		return "", err
 	}
 	r := &maps.GeocodingRequest{Address: v.toString()}
 	resp, err := c.Geocode(context.Background(), r)
 
 	if len(resp) != 1 {
 		log.Printf("Expected length of response is 1, was %+v", len(resp))
+		return "", err
 	}
 	if err != nil {
 		log.Printf("r.Get returned non nil error: %v", err)
+		return "", err
 	}
 	log.Printf("geoloc: %#v", resp)
 	// resp[0].PlaceID = provides a PlaceID
