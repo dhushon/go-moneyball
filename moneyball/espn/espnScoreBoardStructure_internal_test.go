@@ -59,6 +59,7 @@ func TestMarshalMSTeam(t *testing.T) {
 		assert.Nil(t, err, fmt.Errorf("error %#v: translating %#v, to %#v", err, team, tm))
 		mTeam = append(mTeam, tm)
 	}
+	assert.Equal(t, len(ts.Sport[0].Leagues[0].Teams), len(mTeam),"cross marshalled teams are not equivalent, but should be")
 	//should have a certain number of teams
 	log.Printf("espnTeam->MSTeam worked\n")
 }

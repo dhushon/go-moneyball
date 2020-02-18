@@ -301,25 +301,25 @@ type ATeam struct {
 
 //Team ...
 type Team struct {
-	ID               string        `json:"id" binding:"required"`
-	UID              string        `json:"uid" binding:"required"`
-	Slug             string        `json:"slug,omitempty"`
-	Location         string        `json:"location,omitempty"`         //"Toronto",
-	Name             string        `json:"name,omitempty"`             // "Raptors"
-	Abbreviation     string        `json:"abbreviation,omitempty"`     // "TOR"
-	DisplayName      string        `json:"displayName,omitempty"`      // "Toronto Raptors"
-	ShortDisplayName string        `json:"shortDisplayName,omitempty"` // Raptors
-	Color            string        `json:"color,omitempty"`            //"CEOF41"
-	AlternateColor   string        `json:"alternateColor,omitempty"`   //"061922"
-	IsActive         bool          `json:"isActive"`
-	IsAllStar        bool          `json:"isAllStar"`
-	Venue            Venue         `json:"venue"`
-	Links            []Link        `json:"links,omitempty"`
-	Logos            []Link        `json:"logos,omitempty"`
-	Logo             string        `json:"logo,omitempty"`
-	Score            string        `json:"score,omitempty"`
-	Linescores       []Linescore   `json:"linescores,omitempty"`
-	Record           []RecordItems `json:"record,omitempty"`
+	ID               string       `json:"id" binding:"required"`
+	UID              string       `json:"uid" binding:"required"`
+	Slug             string       `json:"slug,omitempty"`
+	Location         string       `json:"location,omitempty"`         //"Toronto",
+	Name             string       `json:"name,omitempty"`             // "Raptors"
+	Abbreviation     string       `json:"abbreviation,omitempty"`     // "TOR"
+	DisplayName      string       `json:"displayName,omitempty"`      // "Toronto Raptors"
+	ShortDisplayName string       `json:"shortDisplayName,omitempty"` // Raptors
+	Color            string       `json:"color,omitempty"`            //"CEOF41"
+	AlternateColor   string       `json:"alternateColor,omitempty"`   //"061922"
+	IsActive         bool         `json:"isActive"`
+	IsAllStar        bool         `json:"isAllStar"`
+	Venue            Venue        `json:"venue"`
+	Links            []Link       `json:"links,omitempty"`
+	Logos            []Link       `json:"logos,omitempty"`
+	Logo             string       `json:"logo,omitempty"`
+	Score            string       `json:"score,omitempty"`
+	Linescores       []Linescore  `json:"linescores,omitempty"`
+	Record           *RecordItems `json:"record,omitempty"`
 }
 
 // RecordItems ...
@@ -335,8 +335,8 @@ type TeamStatistic struct {
 
 // Item ...
 type Item struct {
-	Summary string          `json:"summary"` //"summary":"7-27",
-	Stats   []TeamStatistic `json:"stats"`   //"stats":[
+	Summary string           `json:"summary"` //"summary":"7-27",
+	Stats   []*TeamStatistic `json:"stats"`   //"stats":[
 }
 
 //Link ...
@@ -566,7 +566,6 @@ func (comp *Competitor) marshalMSCompetitor() (*ms.Competitor, error) {
 	t := (*comp).Team
 	c.Name = t.Name
 	c.Abbreviation = t.Abbreviation
-	//c.Record = t.
 	linescores := []ms.Score{}
 	for _, lsc := range t.Linescores {
 		linescores = append(linescores, ms.Score{Score: lsc.Value})
@@ -583,43 +582,6 @@ func (comp *Competitor) marshalMSCompetitor() (*ms.Competitor, error) {
 		links = append(links, *l)
 	}
 	c.Links = &links
-
-	/*
-		type Team struct {
-		ID               string        `json:"id" binding:"required"`
-		UID              string        `json:"uid" binding:"required"`
-		Slug             string        `json:"slug,omitempty"`
-		Location         string        `json:"location,omitempty"`         //"Toronto",
-		Name             string        `json:"name,omitempty"`             // "Raptors"
-		Abbreviation     string        `json:"abbreviation,omitempty"`     // "TOR"
-		DisplayName      string        `json:"displayName,omitempty"`      // "Toronto Raptors"
-		ShortDisplayName string        `json:"shortDisplayName,omitempty"` // Raptors
-		Color            string        `json:"color,omitempty"`            //"CEOF41"
-		AlternateColor   string        `json:"alternateColor,omitempty"`   //"061922"
-		IsActive         bool          `json:"isActive"`
-		IsAllStar        bool          `json:"isAllStar"`
-		Venue            Venue         `json:"venue"`
-		Links            []Link        `json:"links,omitempty"`
-		Logos            []Link        `json:"logos,omitempty"`
-		Logo             string        `json:"logo,omitempty"`
-		Score            string        `json:"score,omitempty"`
-		Linescores       []Linescore   `json:"linescores,omitempty"`
-		Record           []RecordItems `json:"record,omitempty"`}*/
-
-	/*
-		type Competitor struct {
-		EntityID
-		Name           string   `json:"name,omitempty"`
-		Abbreviation   string   `json:"abbreviation"`
-		Record         Record   `json:"record,omitempty"`
-		Score		   int 		`json:"score"`
-		LineScore      *[]Score `json:"linescore,omitempty"` //"linescore":[{"score":"30"},{"score":"32"},{"score":"23"},{"score":"19"}]},
-		Location       string   `json:"location"`
-		Color          string   `json:"color"`
-		AlternateColor string   `json:"alternateColor"`
-		IsActive       bool     `json:"isActive"`
-		IsAllStar      bool     `json:"isAllStar"`
-		Link           *Link    `json:"logos"`}*/
 	return &c, nil
 }
 
@@ -651,7 +613,9 @@ func marshalMSTeam(t *Team) (*ms.Team, error) {
 	team.Location = t.Location
 
 	//marshall Logos
-	team.Logos = []*ms.Link{}
+	if team.Logos == nil {
+		team.Logos = []*ms.Link{}
+	}
 	for _, link := range t.Logos {
 		logo, _ := marshalMSLink(&link)
 		logo.IsLogo = true
@@ -659,25 +623,32 @@ func marshalMSTeam(t *Team) (*ms.Team, error) {
 	}
 
 	//Marshall Links
-	team.Links = []*ms.Link{}
+	if team.Links == nil {
+		team.Links = []*ms.Link{}
+	}
 	for _, link := range t.Links {
 		lnk, _ := marshalMSLink(&link)
 		team.Links = append(team.Links, lnk)
 	}
-	//TODO: Test TeamSeasonRecords field...
-	team.Records = []*ms.TeamSeasonRecords{}
-	for _, rec := range t.Record { // set of records.. "per season"
-		tsr := ms.TeamSeasonRecords{Season: nil, Summary: "", Stats: nil}
-		for _, item := range rec.Items { // Item has a Summary and a range of Items... Summary is description
-			tsr.Summary = item.Summary
-			tStats := []*ms.Stat{}
-			for _, stat := range item.Stats { // each TeamRecord
-				tStats = append(tStats, &ms.Stat{Key: stat.Name, LongKey: stat.Name, Value: stat.Value})
-			}
-			tsr.Stats = tStats
-		}
-		team.Records = append(team.Records, &tsr)
+
+	if team.Records == nil {
+		team.Records = []*ms.TeamSeasonRecords{}
 	}
-	team.Rosters = []*ms.TeamSeasonRoster{}
+	tsr := ms.TeamSeasonRecords{Season: nil, Summary: "", Stats: nil}
+	//TODO: label the record
+	for _, item := range t.Record.Items { // Item has a Summary and a range of Items... Summary is description
+		tsr.Summary = item.Summary
+		tStats := []*ms.Stat{}
+		for _, stat := range item.Stats { // each TeamRecord
+			tStats = append(tStats, &ms.Stat{Key: stat.Name, LongKey: stat.Name, Value: stat.Value})
+		}
+		tsr.Stats = tStats
+	}
+	team.Records = append(team.Records, &tsr)
+	// TODO: build roster model
+	if team.Rosters == nil {
+		team.Rosters = []*ms.TeamSeasonRoster{}
+	}
+	// marshal the roster for the team / game
 	return &team, nil
 }
