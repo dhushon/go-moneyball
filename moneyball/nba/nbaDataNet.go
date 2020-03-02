@@ -234,8 +234,75 @@ type TeamStatistic struct {
 	Players     []Person `json:"leader"`      //	"leader":[{"PersonID":"200768","PlayerCode":"kyle_lowry","FirstName":"Kyle","LastName":"Lowry"}],
 }
 
-//TeamStats ...
+//TeamStats - NBA Boxscore Stats for Team Performance
 type TeamStats struct {
+	//			"vTeam":{"fastBreakPoints":"10","pointsInPaint":"40","biggestLead":"0",
+	// "secondChancePoints":"10","pointsOffTurnovers":"4","longestRun":"13","totals":{"points":"71","fgm":"27","fga":"81","fgp":"33.3","ftm":"11","fta":"19","ftp":"57.9","tpm":"6","tpa":"22","tpp":"27.3","offReb":"7","defReb":"27","totReb":"34","assists":"20","pFouls":"16","steals":"9","turnovers":"21","blocks":"2","plusMinus":"-69","min":"240:00","short_timeout_remaining":"0","full_timeout_remaining":"2","team_fouls":"14"},"leaders":{"points":{"value":"27","players":[{"personId":"202700","firstName":"Donatas","lastName":"Motiejunas"}]},"rebounds":{"value":"11","players":[{"personId":"202700","firstName":"Donatas","lastName":"Motiejunas"}]},"assists":{"value":"3","players":[{"personId":"27013","firstName":"Mingxin","lastName":"Ju"},{"personId":"202700","firstName":"Donatas","lastName":"Motiejunas"},{"personId":"203263","firstName":"James","lastName":"Nunnally"},{"personId":"64097","firstName":"Xudong","lastName":"Luo"},{"personId":"64091","firstName":"Liang","lastName":"Cai"}]}}},
+	FastBreakPoints FlexInt `json:"fastBreakPoints"`
+	PointsInPaint   FlexInt `json:"pointsInPaint"`
+	BiggestLead		FlexInt `json:"biggestLead"`
+	SecondChancePoints FlexInt `json:"secondChancePoints"`
+	PointsOffTurnovers FlexInt `json:"pointsOffTurnovers"`
+	LongestRun 	FlexInt `json:"longestRun"`
+	//TODO: points
+	//TODO: leaders
+}
+//BoxStats ... grabbing the stats
+type BoxStats struct {
+	GameTimesTied FlexInt `json:"timesTied"` //"timesTied":"0",
+	GameLeadChanges FlexInt `json:"leadChanges"` //"leadChanges":"0",
+	GameTeamStatsVisit *TeamStats `json:"vTeam"`
+	GameTeamStatsHome  *TeamStats `json:"hTeam"`
+	GamePlayerStats    []*PlayerStats `json:"activePlayers"`
+}
+
+// PlayerStats ... note this comes from boxscore https://data.nba/net, 
+// Endpoint: /data/10s/prod/v1/{{date}}/{{gameId}}_boxscore.json
+// Parameters: date,gameId
+// and specifically 20190930/0011900001
+//{ "personId":"64098","firstName":"Hanlin","lastName":"Dong","jersey":"10",
+//  "teamId":"12329","isOnCourt":false,"points":"0","pos":"C","position_full":"Center","player_code":"",
+//  "min":"12:07","fgm":"0","fga":"1","fgp":"0.0",
+//  "ftm":"0","fta":"0","ftp":"0.0","tpm":"0","tpa":"0","tpp":"0.0",
+// "offReb":"0","defReb":"1","totReb":"1","assists":"0","pFouls":"2","steals":"0",
+// "turnovers":"1","blocks":"0","plusMinus":"-35","dnp":"",
+// "sortKey":{"name":3,"pos":0,"points":25,"min":20,"fgm":24,"fga":23,"fgp":24,"ftm":19,"fta":19,"ftp":19,"tpm":18,"tpa":24,"tpp":18,"offReb":21,"defReb":17,"totReb":18,"assists":23,"pFouls":10,"steals":19,"turnovers":10,"blocks":18,"plusMinus":30}},
+type PlayerStats struct {
+	PersonID 	FlexInt 	`json:"personId"`
+	FirstName	string 		`json:"firstName"`
+	LastName    string		`json:"lastName"`
+	Jersey      FlexInt		`json:"jersey"`
+	TeamID      FlexInt		`json:"teamId"`
+	IsOnCourt   bool		`json:"isOnCourt"`
+	Points      FlexInt		`json:"points"`
+	PositionShort string	`json:"pos"`
+	PositionFull string		`json:"position_full"`
+	PlayerCode 	string		`json:"player_code"`
+	Minutes     string		`json:"min"` //TODO: FlexFloat
+	FieldGoalsMade FlexInt	`json:"fgm"`
+	FieldGoalsAttempted FlexInt `json:"fga"`
+	FieldGoalsPercentage	string `json:"fgp"` //TODO: FlexFloat
+	FreeThrowsMade FlexInt	`json:"ftm"`
+	FreeThrowsAttempted FlexInt `json:"fta"`
+	FreeThrowsPercentage	string `json:"ftp"` //TODO: FlexFloat
+	ThreePointsMade FlexInt `json:"tpm"`
+	ThreePointsAttempted FlexInt `json:"tpa"`
+	ThreePointsPercentage string `json:"tpp"` //TODO: FlexFloat
+	ReboundsOffensive	FlexInt `json:"offReb"`
+	ReboundsDefensive	FlexInt `json:"defReb"`
+	ReboundsTotal		FlexInt `json:"totReb"`
+	Assists				FlexInt `json:"assists"`
+	PersonalFouls		FlexInt `json:"pFouls"`
+	Steals				FlexInt `json:"steals"`
+	Turnovers			FlexInt `json:"turnovers"`
+	Blocks				FlexInt `json:"blocks"`
+	PlusMinus			FlexInt `json:"plusMinus"`
+	DNP	string `json:"dnp"`
+	//TODO: need to figure out if we need sort order
+}
+
+//TeamPointStats ...
+type TeamPointStats struct {
 	Points                  FlexInt `json:"points,omitempty"`                    //TODO unmarshal to int and add to event-stats?
 	FieldGoalsMade          FlexInt `json:"field_goals_made,omitempty"`          //TODO unmarshal to int and add to event-stats?
 	FieldGoalsAttempted     FlexInt `json:"field_goals_attempted,omitempty"`     //TODO unmarshal to int and add to event-stats?
@@ -273,7 +340,7 @@ type WorkingTeam struct {
 	Score        FlexInt        `json:"score"`                  //"score":"104", //TODO string to int
 	Linescores   Linescore      `json:"linescores"`
 	Leaders      TeamStatLeader `json:"Leaders"`
-	TeamStats    TeamStats      `json:"stats"`
+	TeamStats    TeamPointStats      `json:"stats"`
 	Players      PlayerArray    `json:"players"` //TODO... properly parse this... don't need holding structure
 }
 

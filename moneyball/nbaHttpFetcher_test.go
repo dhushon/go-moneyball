@@ -69,6 +69,21 @@ func TestNBAScheduleServicev2(t *testing.T) {
 }
 
 func TestNBABoxScoreServicev2(t *testing.T) {
+	client := NewClient(nil)
+	ctx := context.Background()
+	params := map[string]string{
+		"gamedate": "20190930",
+		"gameid":   "0011900001",
+	}
+	temp, _, err := client.Score.NBABoxScoreServicev2(ctx, params)
+	assert.Nil(t, err, err)
+	ev, _ := temp.MarshalMSEvent()
+	spew.Printf("nba.Event: %#v \n ms.Event: %#+v\n", temp, ev)
+
+
+}
+
+func TestNBABoxScoreServiceFromSchedulev2(t *testing.T) {
 	fmt.Println("Starting TestNBABoxSCoreServicev2...\n----")
 	client := NewClient(nil)
 	ctx := context.Background()
@@ -108,6 +123,7 @@ func TestNBABoxScoreServicev2(t *testing.T) {
 			}
 			fmt.Printf("next\n")
 		}
+		//TODO: detailed testing of per player boxscores
 	}
 
 }

@@ -538,7 +538,7 @@ func (e *Event) MarshalMSEvent(l League) (*ms.Event, error) {
 	bs.GameDetail = &gd
 
 	/* Event
-	Extracted    *time.Time     `json:"extract_time,omitempty"`
+	Extracted    *time.Time    `json:"extract_time,omitempty"`
 	ExtractedSrc string        `json:"extract_src,omitempty"`
 	ID           string        `json:"id" binding:"required"`
 	UID          string        `json:"uid" binding:"required"`

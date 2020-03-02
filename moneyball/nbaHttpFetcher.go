@@ -181,7 +181,8 @@ func nbaPathModifier(orig string, modifier map[string]string) (string, error) {
 
 //NBABoxScoreServicev2 will, for a http client, provide a ScheduledGame ( note that this is not yet normalized to structures)
 //		boxscorev1 http://data.nba.net/prod/v1/{gameDate}/{gameId}_boxscore.json e.g. http://data.nba.net/prod/v1/20170201/0021600732_boxscore.json
-func (s *ScoreService) NBABoxScoreServicev2(ctx context.Context, modifier map[string]string) (*nba.ScheduledGamev2, *Response, error) {
+func (s *ScoreService) NBABoxScoreServicev2(ctx context.Context, modifier map[string]string) (*nba.ScheduledGamev2,
+	*Response, error) {
 
 	s.client.BaseURL, _ = url.Parse(nba.DataNBABaseURLv2)
 	path := "prod/v1/{gamedate}/{gameid}_boxscore.json"
@@ -209,7 +210,7 @@ func (s *ScoreService) NBABoxScoreServicev2(ctx context.Context, modifier map[st
 		log.Printf("Error on new request: %s\n", err)
 		return nil, resp, err
 	}
-	return &event.Game, resp, err
+	return event.Game, resp, err
 }
 
 //NBAScheduleServicev2 is an updated nba feed for NBA Schefule information

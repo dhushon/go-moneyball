@@ -60,9 +60,11 @@ type CMSProdv2Schedule struct {
 
 //CMSProdv1BoxScore ...
 type CMSProdv1BoxScore struct {
-	InternalStuff InternalProdv2  `json:"_internal"`     //"_internal":{}
-	Game          ScheduledGamev2 `json:"basicGameData"` //"basicGameData":{}
-	PrevMatchup   GamePointerv2   `json:"previoudMatchup"`
+	InternalStuff *InternalProdv2  `json:"_internal"`     //"_internal":{}
+	Game          *ScheduledGamev2 `json:"basicGameData"` //"basicGameData":{}
+	PrevMatchup   *GamePointerv2   `json:"previoudMatchup"`
+	BoxStats	  *BoxStats  `json:"stats"`
+
 }
 
 //GamePointerv2 ...
