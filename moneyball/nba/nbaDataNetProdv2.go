@@ -63,7 +63,7 @@ type CMSProdv1BoxScore struct {
 	InternalStuff *InternalProdv2  `json:"_internal"`     //"_internal":{}
 	Game          *ScheduledGamev2 `json:"basicGameData"` //"basicGameData":{}
 	PrevMatchup   *GamePointerv2   `json:"previoudMatchup"`
-	BoxStats	  *BoxStats  `json:"stats"`
+	BoxStats	  *BoxStats  		`json:"stats"`
 
 }
 
@@ -262,4 +262,10 @@ func (a *Arena) marshalMSVenue() (*ms.Venue, error) {
 	_, err := ms.GetGeoCodeAddress(&v)
 	//TODO: Setup EntityID..
 	return &v, err
+}
+
+//marshalMSGamePlayerStat ... long name, but need to map NBA BoxScore Player stats to MS.GamePlayerStats
+func (ps *PlayerStats) marshalMSGamePlayerStat(gameID string, teamID string) (*ms.GamePlayersStats, error) {
+	
+	return nil, nil
 }

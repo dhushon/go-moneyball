@@ -34,6 +34,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 // a competitor is a team at an event
 // a team has a roster of players
 // a competitor has a roster of players for that event that play for the team
+// a player plays in a event as part of a team
 
 import (
 	"time"
@@ -42,13 +43,13 @@ import (
 //Team ...
 type Team struct {
 	EntityID
-	TeamIDNBA    string `json:"teamIdNBA,omitempty"` //"teamId":"1610612745"
-	TeamIDESPN   string `json:"teamIdESPN,omitempty"`
-	Abbreviation string `json:"abbreviation"`
-	Name         string `json:"name"`
+	TeamIDNBA    string  `json:"teamIdNBA,omitempty"` //"teamId":"1610612745"
+	TeamIDESPN   string  `json:"teamIdESPN,omitempty"`
+	Abbreviation string  `json:"abbreviation"`
+	Name         string  `json:"name"`
 	Location     string  `json:"teamLocation"` // e.g. "Atlanta" Hawks
 	Logos        []*Link `json:"logos,omitempty"`
-	Links 		 []*Link `json:"links,omitempty"`
+	Links        []*Link `json:"links,omitempty"`
 	//TODO: how to treat historic record?
 	Records []*TeamSeasonRecords `json:"records,omitempty"`
 	Rosters []*TeamSeasonRoster  `json:"rosters,omitempty"` // roster is copied to Competitor for a given game
@@ -61,10 +62,12 @@ type TeamSeasonRecords struct {
 	Stats   []*Stat `json:"teamStat,omitempty"`
 }
 
-//GamePlayerStats ... may be used in boxScores to do game stats associated with Player
-type GamePlayerStats struct {
-	EntityID `json:"gamePlayerID"`
-	Stats    []*Stat `json:"gamePlayerStat"`
+//GamePlayersStats ... may be used in boxScores to do game stats associated with Player on a Team
+type GamePlayersStats struct {
+	PlayerID string  `json:"gamePlayerID"`   // for a player
+	TeamID   string  `json:"teamID"`         // on a team
+	GameID   string  `json:"gameID"`         // during a game
+	Stats    []*Stat `json:"gamePlayerStat"` // here is a slice of pointers to stats the stats
 }
 
 //Stat .. a well known stat both short/long verions if exists

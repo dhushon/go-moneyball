@@ -261,25 +261,42 @@ func CreateTable(projectID, datasetID string, tableID string, metadata *bigquery
 	return nil
 }
 
+//MasterEntity returns a string that is used as the master identity (UID/key) for table/data structure
+// element in this case Venue it is represented as a GeoCode
+func (v *Venue) MasterEntity() (string, error) {
+	if v.Address == nil {
+		return "", fmt.Errorf("Address for Venue cannot be Nil when trying to generate an Entity Key")
+	}
+	if v.EntityID.ID != "" {
+		return v.EntityID.ID, nil
+	}
+	return GetGeoCodeAddress(v)
+}
+
+//MasterEntity returns a string that is used as the master identity (UID/key) for table/data structure
+func (p *Player) MasterEntity() (string, error) {
+	return "", nil
+}
+
 func main() {
 	var bsc = ScoreBoard{
 		[]Event{
-			Event{EntityID{"2019-12-28.WSH.DET",nil,""}, "2019-12-28.WSH.DET", "NBA", Season{2019, 1},
-				&Competitor{EntityID{"DET-NBA-2019",nil,""}, "Detroit Pistons", "DET", nil, Record{0, 1, []Item{}},0,  &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
-				&Competitor{EntityID{"WAS-NBA-2019",nil,""}, "Washington Wizards", "WAS", nil, Record{1, 0, []Item{}},0, &[]Score{}, "Washington", "0E3764", "e31837", true, false, nil},
+			Event{EntityID{"2019-12-28.WSH.DET", nil, ""}, "2019-12-28.WSH.DET", "NBA", Season{2019, 1},
+				&Competitor{EntityID{"DET-NBA-2019", nil, ""}, "Detroit Pistons", "DET", nil, Record{0, 1, []Item{}}, 0, &[]Score{}, "Detroit", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"WAS-NBA-2019", nil, ""}, "Washington Wizards", "WAS", nil, Record{1, 0, []Item{}}, 0, &[]Score{}, "Washington", "0E3764", "e31837", true, false, nil},
 				&Venue{EntityID{}, "", "Little Caesars Arena", &Address{}, 10000, true},
-				&GameStatus{0.0,0,"Final","Thu, December 28th at 7:00 PM EST"},
+				&GameStatus{0.0, 0, "Final", "Thu, December 28th at 7:00 PM EST"},
 				&[]Link{
 					Link{"http://www.espn.com/nba/team/roster/_/name/det/detroit-pistons",
-						[]string{"roster"}, "roster",nil, false},
+						[]string{"roster"}, "roster", nil, false},
 				},
 				&GameDetail{},
 			},
-			Event{EntityID{"2017-02-03.TOR.BOS",nil,""}, "2017-02-03.TOR.BOS", "NBA", Season{2017, 1},
-				&Competitor{EntityID{"TOR-NBA-2017",nil,""}, "Toronto Raptors", "TOR", nil, Record{1, 0, []Item{}}, 109, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
-				&Competitor{EntityID{"BOS-NBA-2017",nil,""}, "Boston Celtics", "BOS", nil, Record{0, 1, []Item{}}, 104, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
+			Event{EntityID{"2017-02-03.TOR.BOS", nil, ""}, "2017-02-03.TOR.BOS", "NBA", Season{2017, 1},
+				&Competitor{EntityID{"TOR-NBA-2017", nil, ""}, "Toronto Raptors", "TOR", nil, Record{1, 0, []Item{}}, 109, &[]Score{}, "Toronto", "0x0000", "0xffff", true, false, nil},
+				&Competitor{EntityID{"BOS-NBA-2017", nil, ""}, "Boston Celtics", "BOS", nil, Record{0, 1, []Item{}}, 104, &[]Score{}, "Boston", "0x0000", "0xffff", true, false, nil},
 				&Venue{EntityID{}, "", "TD Garden", &Address{}, 10000, true},
-				&GameStatus{0.0,0,"Final","Thu, February 3rd at 7:00 PM EST"},
+				&GameStatus{0.0, 0, "Final", "Thu, February 3rd at 7:00 PM EST"},
 				&[]Link{},
 				&GameDetail{},
 			},

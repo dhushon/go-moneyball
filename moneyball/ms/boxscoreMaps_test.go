@@ -36,7 +36,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func GetGeoCodeTest(t *testing.T) {
+func TestGetGeoCode(t *testing.T) {
 	a := Address{Street: "601 F St NW", City: "Washington", State: "DC", Country: "United States"}
 	v := Venue{EntityID: EntityID{}, FullName: "Capital One Arena", Address: &a}
 	resp, err := GetGeoCodeAddress(&v)

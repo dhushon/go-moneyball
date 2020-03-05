@@ -168,8 +168,8 @@ type Person struct {
 	FirstName string  `json:"first_name"`
 	FName     string  `json:"FirstName,omitempty"` //used in game->team->leaders
 	LastName  string  `json:"last_name"`
-	LName     string  `json:"LastName"`                //used in game->team->leaders
-	JerseyStr FlexInt `json:"jersey_number,omitempty"` //TODO unmarshall to int
+	LName     string  `json:"LastName"` //used in game->team->leaders
+	Jersey    FlexInt `json:"jersey_number,omitempty"`
 	//PlayerCode 			   string `json:"player_code,omitempty"` //"PlayerCode":"kyle_lowry" //used in game->team->leaders TODO redefinition of player_code?
 	PersonID               string  `json:"person_id"` //TODO unmarshal to ID[int]
 	PersonID2              string  `json:"PersonID"`  // TODO reconcile PersonID2 and PersonID
@@ -238,25 +238,26 @@ type TeamStatistic struct {
 type TeamStats struct {
 	//			"vTeam":{"fastBreakPoints":"10","pointsInPaint":"40","biggestLead":"0",
 	// "secondChancePoints":"10","pointsOffTurnovers":"4","longestRun":"13","totals":{"points":"71","fgm":"27","fga":"81","fgp":"33.3","ftm":"11","fta":"19","ftp":"57.9","tpm":"6","tpa":"22","tpp":"27.3","offReb":"7","defReb":"27","totReb":"34","assists":"20","pFouls":"16","steals":"9","turnovers":"21","blocks":"2","plusMinus":"-69","min":"240:00","short_timeout_remaining":"0","full_timeout_remaining":"2","team_fouls":"14"},"leaders":{"points":{"value":"27","players":[{"personId":"202700","firstName":"Donatas","lastName":"Motiejunas"}]},"rebounds":{"value":"11","players":[{"personId":"202700","firstName":"Donatas","lastName":"Motiejunas"}]},"assists":{"value":"3","players":[{"personId":"27013","firstName":"Mingxin","lastName":"Ju"},{"personId":"202700","firstName":"Donatas","lastName":"Motiejunas"},{"personId":"203263","firstName":"James","lastName":"Nunnally"},{"personId":"64097","firstName":"Xudong","lastName":"Luo"},{"personId":"64091","firstName":"Liang","lastName":"Cai"}]}}},
-	FastBreakPoints FlexInt `json:"fastBreakPoints"`
-	PointsInPaint   FlexInt `json:"pointsInPaint"`
-	BiggestLead		FlexInt `json:"biggestLead"`
+	FastBreakPoints    FlexInt `json:"fastBreakPoints"`
+	PointsInPaint      FlexInt `json:"pointsInPaint"`
+	BiggestLead        FlexInt `json:"biggestLead"`
 	SecondChancePoints FlexInt `json:"secondChancePoints"`
 	PointsOffTurnovers FlexInt `json:"pointsOffTurnovers"`
-	LongestRun 	FlexInt `json:"longestRun"`
+	LongestRun         FlexInt `json:"longestRun"`
 	//TODO: points
 	//TODO: leaders
 }
+
 //BoxStats ... grabbing the stats
 type BoxStats struct {
-	GameTimesTied FlexInt `json:"timesTied"` //"timesTied":"0",
-	GameLeadChanges FlexInt `json:"leadChanges"` //"leadChanges":"0",
-	GameTeamStatsVisit *TeamStats `json:"vTeam"`
-	GameTeamStatsHome  *TeamStats `json:"hTeam"`
+	GameTimesTied      FlexInt        `json:"timesTied"`   //"timesTied":"0",
+	GameLeadChanges    FlexInt        `json:"leadChanges"` //"leadChanges":"0",
+	GameTeamStatsVisit *TeamStats     `json:"vTeam"`
+	GameTeamStatsHome  *TeamStats     `json:"hTeam"`
 	GamePlayerStats    []*PlayerStats `json:"activePlayers"`
 }
 
-// PlayerStats ... note this comes from boxscore https://data.nba/net, 
+// PlayerStats ... note this comes from boxscore https://data.nba/net,
 // Endpoint: /data/10s/prod/v1/{{date}}/{{gameId}}_boxscore.json
 // Parameters: date,gameId
 // and specifically 20190930/0011900001
@@ -268,64 +269,64 @@ type BoxStats struct {
 // "turnovers":"1","blocks":"0","plusMinus":"-35","dnp":"",
 // "sortKey":{"name":3,"pos":0,"points":25,"min":20,"fgm":24,"fga":23,"fgp":24,"ftm":19,"fta":19,"ftp":19,"tpm":18,"tpa":24,"tpp":18,"offReb":21,"defReb":17,"totReb":18,"assists":23,"pFouls":10,"steals":19,"turnovers":10,"blocks":18,"plusMinus":30}},
 type PlayerStats struct {
-	PersonID 	FlexInt 	`json:"personId"`
-	FirstName	string 		`json:"firstName"`
-	LastName    string		`json:"lastName"`
-	Jersey      FlexInt		`json:"jersey"`
-	TeamID      FlexInt		`json:"teamId"`
-	IsOnCourt   bool		`json:"isOnCourt"`
-	Points      FlexInt		`json:"points"`
-	PositionShort string	`json:"pos"`
-	PositionFull string		`json:"position_full"`
-	PlayerCode 	string		`json:"player_code"`
-	Minutes     string		`json:"min"` //TODO: FlexFloat
-	FieldGoalsMade FlexInt	`json:"fgm"`
-	FieldGoalsAttempted FlexInt `json:"fga"`
-	FieldGoalsPercentage	string `json:"fgp"` //TODO: FlexFloat
-	FreeThrowsMade FlexInt	`json:"ftm"`
-	FreeThrowsAttempted FlexInt `json:"fta"`
-	FreeThrowsPercentage	string `json:"ftp"` //TODO: FlexFloat
-	ThreePointsMade FlexInt `json:"tpm"`
-	ThreePointsAttempted FlexInt `json:"tpa"`
-	ThreePointsPercentage string `json:"tpp"` //TODO: FlexFloat
-	ReboundsOffensive	FlexInt `json:"offReb"`
-	ReboundsDefensive	FlexInt `json:"defReb"`
-	ReboundsTotal		FlexInt `json:"totReb"`
-	Assists				FlexInt `json:"assists"`
-	PersonalFouls		FlexInt `json:"pFouls"`
-	Steals				FlexInt `json:"steals"`
-	Turnovers			FlexInt `json:"turnovers"`
-	Blocks				FlexInt `json:"blocks"`
-	PlusMinus			FlexInt `json:"plusMinus"`
-	DNP	string `json:"dnp"`
+	PersonID              FlexInt     `json:"personId"`
+	FirstName             string      `json:"firstName"`
+	LastName              string      `json:"lastName"`
+	Jersey                FlexInt     `json:"jersey"`
+	TeamID                FlexInt     `json:"teamId"`
+	IsOnCourt             bool        `json:"isOnCourt"`
+	Points                FlexInt     `json:"points"`
+	PositionShort         string      `json:"pos"`
+	PositionFull          string      `json:"position_full"`
+	PlayerCode            string      `json:"player_code"`
+	Minutes               string      `json:"min"` //TODO: FlexFloat
+	FieldGoalsMade        FlexInt     `json:"fgm"`
+	FieldGoalsAttempted   FlexInt     `json:"fga"`
+	FieldGoalsPercentage  FlexFloat64 `json:"fgp"` //TODO: FlexFloat
+	FreeThrowsMade        FlexInt `json:"ftm"`
+	FreeThrowsAttempted   FlexInt     `json:"fta"`
+	FreeThrowsPercentage  FlexFloat64 `json:"ftp"` //TODO: FlexFloat
+	ThreePointsMade       FlexInt     `json:"tpm"`
+	ThreePointsAttempted  FlexInt     `json:"tpa"`
+	ThreePointsPercentage FlexFloat64 `json:"tpp"` //TODO: FlexFloat
+	ReboundsOffensive     FlexInt     `json:"offReb"`
+	ReboundsDefensive     FlexInt     `json:"defReb"`
+	ReboundsTotal         FlexInt     `json:"totReb"`
+	Assists               FlexInt     `json:"assists"`
+	PersonalFouls         FlexInt     `json:"pFouls"`
+	Steals                FlexInt     `json:"steals"`
+	Turnovers             FlexInt     `json:"turnovers"`
+	Blocks                FlexInt     `json:"blocks"`
+	PlusMinus             FlexInt     `json:"plusMinus"`
+	DNP                   string      `json:"dnp"`
 	//TODO: need to figure out if we need sort order
 }
 
 //TeamPointStats ...
 type TeamPointStats struct {
-	Points                  FlexInt `json:"points,omitempty"`                    //TODO unmarshal to int and add to event-stats?
-	FieldGoalsMade          FlexInt `json:"field_goals_made,omitempty"`          //TODO unmarshal to int and add to event-stats?
-	FieldGoalsAttempted     FlexInt `json:"field_goals_attempted,omitempty"`     //TODO unmarshal to int and add to event-stats?
-	FieldGoalsPercentage    string  `json:"field_goals_percentage,omitempty"`    //TODO unmarshal to float32
-	FreeThrowsMade          FlexInt `json:"free_throws_made,omitempty"`          //TODO unmarshal to int and add to event-stats?
-	FreeThrowsAttempted     FlexInt `json:"free_throws_attempted,omitempty"`     //TODO unmarshal to int and add to event-stats?
-	FreeThrowsPercentage    string  `json:"free_throws_percentage,omitempty"`    //TODO unmarshal to float32
-	ThreePointersMade       FlexInt `json:"three_pointers_made,omitempty"`       //TODO unmarshal to int and add to event-stats?
-	ThreePointersAttempted  FlexInt `json:"three_pointers_attempted,omitempty"`  //TODO unmarshal to int and add to event-stats?
-	ThreePointersPercentage string  `json:"three_pointers_percentage,omitempty"` //TODO unmarshal to float32
-	ReboundsOffensive       FlexInt `json:"rebounds_offsensive,omitempty"`       //TODO unmarshal to int and add to event-stats?
-	ReboundsDefensive       FlexInt `json:"rebounds defensive,omitempty"`        //TODO unmarshal to int and add to event-stats?
-	TeamRebounds            FlexInt `json:"team_rebounds,omitempty"`             // "team_rebounds":"15", //TODO unmarshal to int
-	Assists                 FlexInt `json:"assists,omitempty"`                   //TODO unmarshal to int and add to event-stats?
-	Fouls                   FlexInt `json:"fouls,omitempty"`                     //TODO unmarshal to int and add to event-stats?
-	TeamFouls               FlexInt `json:"team_fouls"`                          //"team_fouls":"10", //TODO unmarshal to int
-	TechnicalFouls          FlexInt `json:"technical_fouls"`                     //"technical_fouls":"1", //TODO unmarshal to int
-	Steals                  FlexInt `json:"steals,omitempty"`                    //TODO unmarshal to int and add to event-stats?
-	Turnovers               FlexInt `json:"turnovers,omitempty"`                 //TODO unmarshal to int and add to event-stats?
-	TeamTurnovers           FlexInt `json:"team_turnovers,omitempty"`            //TODO unmarshal to int and add to event-stats?
-	Blocks                  FlexInt `json:"blocks,omitempty"`                    //TODO unmarshal to int and add to event-stats?
-	ShortTimeoutRemaining   FlexInt `json:"short_timeout_remaining"`             //"short_timeout_remaining":"0", //TODO unmarshal to int
-	FullTimeoutRemaining    FlexInt `json:"full_timeout_remaining"`              //"full_timeout_remaining":"0"}, //TODO unmarshal to int
+	Points                  FlexInt     `json:"points,omitempty"`                    //TODO unmarshal to int and add to event-stats?
+	FieldGoalsMade          FlexInt     `json:"field_goals_made,omitempty"`          //TODO unmarshal to int and add to event-stats?
+	FieldGoalsAttempted     FlexInt     `json:"field_goals_attempted,omitempty"`     //TODO unmarshal to int and add to event-stats?
+	FieldGoalsPercentage    FlexFloat64 `json:"field_goals_percentage,omitempty"`    //TODO unmarshal to float32
+	FreeThrowsMade          FlexInt 	`json:"free_throws_made,omitempty"`          //TODO unmarshal to int and add to event-stats?
+	FreeThrowsAttempted     FlexInt     `json:"free_throws_attempted,omitempty"`     //TODO unmarshal to int and add to event-stats?
+	FreeThrowsPercentage    FlexFloat64 `json:"free_throws_percentage,omitempty"`    //TODO unmarshal to float64
+	ThreePointersMade       FlexInt     `json:"three_pointers_made,omitempty"`       //TODO unmarshal to int and add to event-stats?
+	ThreePointersAttempted  FlexInt     `json:"three_pointers_attempted,omitempty"`  //TODO unmarshal to int and add to event-stats?
+	ThreePointersPercentage FlexFloat64 `json:"three_pointers_percentage,omitempty"` //TODO unmarshal to float64
+	ReboundsOffensive       FlexInt     `json:"rebounds_offsensive,omitempty"`       //TODO unmarshal to int and add to event-stats?
+	ReboundsDefensive       FlexInt     `json:"rebounds defensive,omitempty"`        //TODO unmarshal to int and add to event-stats?
+	TeamRebounds            FlexInt     `json:"team_rebounds,omitempty"`             // "team_rebounds":"15", //TODO unmarshal to int
+	Assists                 FlexInt     `json:"assists,omitempty"`                   //TODO unmarshal to int and add to event-stats?
+	Fouls                   FlexInt     `json:"fouls,omitempty"`                     //TODO unmarshal to int and add to event-stats?
+	TeamFouls               FlexInt     `json:"team_fouls"`                          //"team_fouls":"10", //TODO unmarshal to int
+	TechnicalFouls          FlexInt     `json:"technical_fouls"`                     //"technical_fouls":"1", //TODO unmarshal to int
+	Steals                  FlexInt     `json:"steals,omitempty"`                    //TODO unmarshal to int and add to event-stats?
+	Turnovers               FlexInt     `json:"turnovers,omitempty"`                 //TODO unmarshal to int and add to event-stats?
+	TeamTurnovers           FlexInt     `json:"team_turnovers,omitempty"`            //TODO unmarshal to int and add to event-stats?
+	Blocks                  FlexInt     `json:"blocks,omitempty"`                    //TODO unmarshal to int and add to event-stats?
+	ShortTimeoutRemaining   FlexInt     `json:"short_timeout_remaining"`             //"short_timeout_remaining":"0", //TODO unmarshal to int
+	FullTimeoutRemaining    FlexInt     `json:"full_timeout_remaining"`              //"full_timeout_remaining":"0"}, //TODO unmarshal to int
 }
 
 //WorkingTeam ... visitor/home team info with status...
@@ -340,7 +341,7 @@ type WorkingTeam struct {
 	Score        FlexInt        `json:"score"`                  //"score":"104", //TODO string to int
 	Linescores   Linescore      `json:"linescores"`
 	Leaders      TeamStatLeader `json:"Leaders"`
-	TeamStats    TeamPointStats      `json:"stats"`
+	TeamStats    TeamPointStats `json:"stats"`
 	Players      PlayerArray    `json:"players"` //TODO... properly parse this... don't need holding structure
 }
 
@@ -372,6 +373,35 @@ func (fi *FlexInt) UnmarshalJSON(b []byte) error {
 			return err
 		}
 		*fi = FlexInt(i)
+	}
+	return nil
+}
+
+//FlexFloat64 ... float32 unmarshalled fro JSON field that is passed as a string, or
+// inconsistently (string, int or float)
+type FlexFloat64 float64
+
+//UnmarshalJSON implements the json.Unmarshaler interface, which
+// allows us to ingest values of any json type as an int and run our custom conversion
+func (ff *FlexFloat64) UnmarshalJSON(b []byte) error {
+	if b[0] != '"' { // not a string....already an int or float
+		//TODO:
+		err := json.Unmarshal(b, (*float64)(ff))
+		return err
+	}
+	var s string
+	if err := json.Unmarshal(b, &s); err != nil {
+		return err
+	}
+	if s == "" {
+		*ff = FlexFloat64(0.0)
+	} else {
+		f, err := strconv.ParseFloat(s, 64)
+		if err != nil {
+			log.Printf("Error strconv.ParseFloat FlexFloat convert, %s", s)
+			return err
+		}
+		*ff = FlexFloat64(f)
 	}
 	return nil
 }

@@ -80,7 +80,6 @@ func TestNBABoxScoreServicev2(t *testing.T) {
 	ev, _ := temp.MarshalMSEvent()
 	spew.Printf("nba.Event: %#v \n ms.Event: %#+v\n", temp, ev)
 
-
 }
 
 func TestNBABoxScoreServiceFromSchedulev2(t *testing.T) {

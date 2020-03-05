@@ -40,15 +40,16 @@ import (
 )
 
 const ()
+
 var timeN = time.Now()
-var team1 = Team{EntityID{"WAS",&timeN,"sampleData"},"1610612745","","WAS","Washington Wizards","Washintgon",nil,nil,nil,nil}
-var team2 = Team{EntityID{"DET",&timeN,"sampleData"},"","26","DET","Detroit Pistons","Detroit",nil,nil,nil,nil}
-var team3 = Team{EntityID{"TOR",&timeN,"sampleData"},"","25","TOR","Toronto Raptors","Toronto",nil,nil,nil,nil}
-var team4 = Team{EntityID{"BOS",&timeN,"sampleData"},"","17","BOS","Boston Celtics","Boston",nil,nil,nil,nil}
+var team1 = Team{EntityID{"WAS", &timeN, "sampleData"}, "1610612745", "", "WAS", "Washington Wizards", "Washintgon", nil, nil, nil, nil}
+var team2 = Team{EntityID{"DET", &timeN, "sampleData"}, "", "26", "DET", "Detroit Pistons", "Detroit", nil, nil, nil, nil}
+var team3 = Team{EntityID{"TOR", &timeN, "sampleData"}, "", "25", "TOR", "Toronto Raptors", "Toronto", nil, nil, nil, nil}
+var team4 = Team{EntityID{"BOS", &timeN, "sampleData"}, "", "17", "BOS", "Boston Celtics", "Boston", nil, nil, nil, nil}
 
 //type Team struct {
-	//Records []*TeamSeasonRecords `json:"records"`
-	//Rosters []*TeamSeasonRoster  `json:"rosters"` // roster is copied to Competitor for a given game}
+//Records []*TeamSeasonRecords `json:"records"`
+//Rosters []*TeamSeasonRoster  `json:"rosters"` // roster is copied to Competitor for a given game}
 var bss = ScoreBoard{
 	[]Event{
 		Event{EntityID{"2019-12-28.WSH.DET", nil, ""}, "2019-12-28.WSH.DET", "NBA", Season{2019, 1},
@@ -73,18 +74,32 @@ var bss = ScoreBoard{
 	},
 }
 
+var ven = Venue{EntityID{}, "", "Little Caesars Arena", &Address{Street: "2645 Woodward Avenue", City: "Detroit", State: "MI", Country: "US", GeoLoc: ""}, 20332, true}
+
+//Testing routine for entity mastering
+func TestMasterEntity(t *testing.T) {
+	const GeoCode = "1"
+	s, err := ven.MasterEntity()
+	assert.Nil(t, err, "Venue.MasterEntity returned error", err)
+	assert.EqualValues(t, s, GeoCode, "Venue.MasterEntity returned wrong geocode")
+}
+
 //NDJSONService ... test the NDJSON Encoding of a struct
-func marshalNBJSONTest(t *testing.T) {
+func TestMarshalNBJSON(t *testing.T) {
 	//marshall to ndjson so that we can push to/towards bigquery
 	var b bytes.Buffer // for testing/development we can use bytes.Buffer as writer
-	bss.marshalNBJSON(&b)
-	assert.NotZero(t, b.Len, "ndjson should not be length 0")
-	//TODO: assert.True(t, , "ndjson should include two lines <CR>")
-
 	//marshall with json newline
+	bss.marshalNBJSON(&b)
+	//log.Printf("ndjson Test result %s\n",b.String())
+	assert.NotZero(t, b.Len, "ndjson should not be length 0 %s", b)
+	//we could try and re-read the JSON as another assert.. but too hard? as must have an Unmarshaller that supports
+	//NBJSON vs. JSON... below throws error
+	//var e = []Event{}
+	//err := json.Unmarshal(b.Bytes(),&e)
+	//assert.Nil(t, err, "Unmarshalling of NBJSON failed", err)
 	log.Println("exiting")
 }
 
-func entityIDExtractTest(t *testing.T){
-	
+func TestEntityIDExtract(t *testing.T) {
+
 }

@@ -32,6 +32,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"os"
 
@@ -51,11 +52,15 @@ func (v *Venue) toString() string {
 	a := v.Address
 	str := v.FullName + "," + a.Street + ", " + a.City + ", " + a.State + ", " + a.Country
 	return str
-}
+} 
 
 // GetGeoCodeAddress ... gets a geolocplaceID/pluscode for an address
 func GetGeoCodeAddress(v *Venue) (string, error) {
-	c, err := maps.NewClient(getMapCreds())
+	creds := getMapCreds()
+	if creds == nil {
+		return "",fmt.Errorf("fatal error ensure that Google Mapping API credential are provided")
+	}
+	c, err := maps.NewClient(creds)
 	if err != nil {
 		log.Fatalf("fatal error ensure that Google Mapping API credential were provided: %s", err)
 		return "", err
