@@ -37,10 +37,11 @@ import (
 )
 
 func TestGetGeoCode(t *testing.T) {
+	//actual code for CapitalOneArena is "87C4VXXH+6M"
 	a := Address{Street: "601 F St NW", City: "Washington", State: "DC", Country: "United States"}
 	v := Venue{EntityID: EntityID{}, FullName: "Capital One Arena", Address: &a}
 	resp, err := GetGeoCodeAddress(&v)
 	assert.Nil(t, err, "error geocoding address!")
-	assert.Len(t, resp, 1, "Expect the response to be a singleton")
-	//TODO: test the geocode
+	assert.NotNil(t, resp, "geocode is not Nill")
+	assert.EqualValues(t,resp,"87C4VXXH+6M","geocodes don't match?")
 }

@@ -76,9 +76,10 @@ var bss = ScoreBoard{
 
 var ven = Venue{EntityID{}, "", "Little Caesars Arena", &Address{Street: "2645 Woodward Avenue", City: "Detroit", State: "MI", Country: "US", GeoLoc: ""}, 20332, true}
 
-//Testing routine for entity mastering
+//Testing routine for entity mastering - need to figure out how to cary
+//google credentials else it will always fail.
 func TestMasterEntity(t *testing.T) {
-	const GeoCode = "1"
+	const GeoCode = "86JR8WRV+CV" // real GeoCode for sample venue
 	s, err := ven.MasterEntity()
 	assert.Nil(t, err, "Venue.MasterEntity returned error", err)
 	assert.EqualValues(t, s, GeoCode, "Venue.MasterEntity returned wrong geocode")
